@@ -1,0 +1,377 @@
+@import "tailwindcss";
+
+/* ── BIF Font Faces — full Brasil range (matches the marketing site) ── */
+@font-face { font-family: 'Brasil'; src: url('/fonts/BrasilDEMO-Extralight.otf') format('opentype'); font-weight: 200; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Brasil'; src: url('/fonts/BrasilDEMO-ExtralightItalic.otf') format('opentype'); font-weight: 200; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Brasil'; src: url('/fonts/BrasilDEMO-Light.woff2') format('woff2'), url('/fonts/BrasilDEMO-Light.otf') format('opentype'); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Brasil'; src: url('/fonts/BrasilDEMO-LightItalic.otf') format('opentype'); font-weight: 300; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Brasil'; src: url('/fonts/BrasilDEMO-Regular.otf') format('opentype'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Brasil'; src: url('/fonts/BrasilDEMO-RegularItalic.otf') format('opentype'); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Brasil'; src: url('/fonts/BrasilDEMO-Medium.woff2') format('woff2'), url('/fonts/BrasilDEMO-Medium.otf') format('opentype'); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Brasil'; src: url('/fonts/BrasilDEMO-MediumItalic.otf') format('opentype'); font-weight: 500; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Brasil'; src: url('/fonts/BrasilDEMO-Bold.otf') format('opentype'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Brasil'; src: url('/fonts/BrasilDEMO-BoldItalic.otf') format('opentype'); font-weight: 700; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Brasil'; src: url('/fonts/BrasilDEMO-Black.otf') format('opentype'); font-weight: 900; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Brasil'; src: url('/fonts/BrasilDEMO-BlackItalic.otf') format('opentype'); font-weight: 900; font-style: italic; font-display: swap; }
+
+/* ── BIF Design Tokens ── */
+@theme {
+  /* Colors — Brand */
+  --color-ember: #bb3308;
+  --color-azure: #51c8ff;
+  --color-amethyst: #b23fff;
+
+  /* Colors — Secondary */
+  --color-sage: #17ff3e;
+  --color-marigold: #e5c64c;
+  --color-sand: #e1d9b5;
+  --color-coral: #f99676;
+  --color-mist: #a0b1bf;
+
+  /* Colors — Ground */
+  --color-nightfall: #16150f;
+  --color-ink: #1a1813;
+  --color-wonder: #14122b;
+  --color-stone: #8a8473;
+  --color-paper: #f4efe6;
+  --color-cloud: #ffffff;
+  --color-site: #16150F;
+
+  /* Semantic */
+  --color-bg-brand: var(--color-ember);
+  --color-text-brand: var(--color-ember);
+
+  /* Typography */
+  --font-display: 'Brasil', Georgia, serif;
+  --font-mono: 'Space Mono', 'Courier New', monospace;
+  --font-sans: 'Public Sans', system-ui, sans-serif;
+
+  /* Spacing (8pt scale) */
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-4: 16px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
+  --spacing-24: 96px;
+}
+
+/* ── Base Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background: #16150F;
+  color: #ffffff;
+  font-family: 'Public Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: #16150F;
+}
+
+/* Custom blended circle cursor (CursorBlend) replaces the native cursor on
+   pointer devices, so the only thing you see is the circle. */
+@media (pointer: fine) {
+  *, *::before, *::after { cursor: none !important; }
+}
+
+button, input, textarea, select {
+  font-family: inherit;
+}
+
+/* ── Card sizing ── */
+.section-card {
+  width: min(260px, calc(50% - 12px));
+  height: 180px;
+}
+
+@media (max-width: 480px) {
+  .section-card {
+    width: 100%;
+    height: 140px;
+  }
+}
+
+/* ── Agent mode — hide human content when [data-view-mode="agent"] ── */
+html[data-view-mode="agent"] .human-only {
+  display: none !important;
+}
+
+html[data-view-mode="human"] .agent-only {
+  display: none !important;
+}
+
+/* ── Use next/font loaded variables ── */
+html {
+  --font-mono: var(--loaded-space-mono), 'Courier New', monospace;
+  --font-sans: var(--loaded-public-sans), system-ui, sans-serif;
+  --font-dm-mono: var(--loaded-dm-mono), var(--loaded-space-mono), ui-monospace, monospace;
+}
+
+/* ============================================================
+   SHARED DESIGN SYSTEM — mirrors the BIF 2027 marketing site.
+   One fluid scale + tokens, used everywhere. Anchored to the
+   Figma 72-37 type ramp (12 / 16 / 24 / 56 / 96 / 120) and 8pt
+   spacing. Components should size text via the .t-* utilities.
+   ============================================================ */
+:root {
+  /* font roles (resolve to the next/font-loaded faces above) */
+  --font-body: var(--loaded-public-sans), system-ui, -apple-system, sans-serif;
+  --font-display: 'Brasil', 'Archivo', Georgia, serif;
+
+  /* TYPE SCALE (fluid mobile → desktop) */
+  --fs-mega: clamp(3rem, 13vw, 13rem);              /* 48 → 208 */
+  --fs-display: clamp(3.25rem, 9vw, 8rem);          /* 52 → 128 */
+  --fs-h1: clamp(2.5rem, 6vw, 6rem);                /* 40 → 96  */
+  --fs-h2: clamp(1.875rem, 4.4vw, 3.5rem);          /* 30 → 56  */
+  --fs-h3: clamp(1.5rem, 2.6vw, 2.125rem);          /* 24 → 34  */
+  --fs-statement: clamp(1.3125rem, 1.6vw, 1.5rem);  /* 21 → 24  */
+  --fs-title: clamp(1.1875rem, 1.5vw, 1.5rem);      /* 19 → 24  */
+  --fs-lead: clamp(1.0625rem, 1.3vw, 1.25rem);      /* 17 → 20  */
+  --fs-body: clamp(0.9375rem, 1vw, 1rem);           /* 15 → 16  */
+  --fs-small: 0.875rem;                              /* 14 */
+  --fs-label: 0.75rem;                               /* 12 */
+  --fs-micro: 0.625rem;                              /* 10 */
+
+  /* line-height + tracking */
+  --lh-tight: 1.02;
+  --lh-snug: 1.1;
+  --lh-title: 1.2;
+  --lh-body: 1.6;
+  --lh-label: 1.4;
+  --tr-tight: -0.02em;
+  --tr-head: -0.015em;
+  --tr-label: 0.14em;
+
+  /* SPACING — 8pt */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 20px;
+  --sp-6: 24px; --sp-8: 32px; --sp-10: 40px; --sp-12: 48px; --sp-16: 64px;
+  --sp-20: 80px; --sp-24: 96px; --sp-32: 128px;
+  --sp-section: clamp(104px, 13vw, 184px);
+
+  /* radius */
+  --r-pill: 999px;
+  --r-card: 22px;
+  --r-media: 14px;
+  --r-sm: 8px;
+
+  /* layout grid */
+  --maxw: 1440px;
+  --pad: clamp(20px, 5vw, 64px);
+  --gutter: 24px;
+
+  /* signature motion curve (shared with the marketing site) */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ---------- TYPE UTILITIES (the only way to size text) ---------- */
+.t-mega { font-family: var(--font-display); font-weight: 900; font-size: var(--fs-mega); line-height: 0.92; letter-spacing: var(--tr-tight); }
+.t-display { font-family: var(--font-display); font-weight: 500; font-size: var(--fs-display); line-height: var(--lh-tight); letter-spacing: var(--tr-tight); }
+.t-h1 { font-family: var(--font-display); font-weight: 500; font-size: var(--fs-h1); line-height: var(--lh-tight); letter-spacing: -0.018em; }
+.t-h2 { font-family: var(--font-display); font-weight: 500; font-size: var(--fs-h2); line-height: 1.06; letter-spacing: var(--tr-head); }
+.t-h3 { font-family: var(--font-display); font-weight: 500; font-size: var(--fs-h3); line-height: var(--lh-snug); letter-spacing: -0.01em; }
+.t-statement { font-family: var(--font-display); font-weight: 500; font-size: var(--fs-statement); line-height: 1.32; letter-spacing: 0; }
+.t-title { font-family: var(--font-display); font-weight: 500; font-size: var(--fs-title); line-height: var(--lh-title); letter-spacing: -0.005em; }
+.t-lead { font-family: var(--font-body); font-weight: 400; font-size: var(--fs-lead); line-height: 1.5; }
+.t-body { font-family: var(--font-body); font-weight: 400; font-size: var(--fs-body); line-height: var(--lh-body); }
+.t-label { font-family: var(--font-mono); text-transform: uppercase; font-size: var(--fs-label); letter-spacing: var(--tr-label); line-height: var(--lh-label); }
+.t-micro { font-family: var(--font-mono); text-transform: uppercase; font-size: var(--fs-micro); letter-spacing: 0.12em; line-height: var(--lh-label); }
+/* interactive chrome (nav, toggles, CTAs) — DM Mono, matching the site */
+.t-ui { font-family: var(--font-dm-mono); text-transform: uppercase; font-size: var(--fs-label); letter-spacing: 0.04em; line-height: 1; }
+
+/* ---------- layout helpers ---------- */
+.wrap { width: 100%; max-width: var(--maxw); margin: 0 auto; padding-left: var(--pad); padding-right: var(--pad); }
+.section { position: relative; width: 100%; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+/* ── Card video fade-in ── */
+@keyframes card-video-fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── KB Prose — Obsidian-style markdown rendering ── */
+.kb-prose {
+  font-family: 'Public Sans', system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.kb-prose h1 {
+  font-family: 'Brasil', Georgia, serif;
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1.25;
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.kb-prose h2 {
+  font-family: 'Brasil', Georgia, serif;
+  font-weight: 500;
+  font-size: 17px;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 28px;
+  margin-bottom: 10px;
+}
+
+.kb-prose h3 {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  margin-top: 22px;
+  margin-bottom: 8px;
+}
+
+.kb-prose h4,
+.kb-prose h5,
+.kb-prose h6 {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 16px;
+  margin-bottom: 6px;
+}
+
+.kb-prose p {
+  margin-bottom: 14px;
+}
+
+.kb-prose strong {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.kb-prose em {
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.kb-prose a {
+  color: #51c8ff;
+  text-decoration: none;
+}
+
+.kb-prose a:hover {
+  text-decoration: underline;
+}
+
+.kb-prose ul,
+.kb-prose ol {
+  padding-left: 20px;
+  margin-bottom: 14px;
+}
+
+.kb-prose ul {
+  list-style-type: disc;
+}
+
+.kb-prose ol {
+  list-style-type: decimal;
+}
+
+.kb-prose li {
+  margin-bottom: 5px;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.kb-prose li > ul,
+.kb-prose li > ol {
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+
+.kb-prose blockquote {
+  border-left: 2px solid rgba(255, 255, 255, 0.2);
+  padding-left: 16px;
+  margin: 16px 0;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
+.kb-prose code {
+  font-family: 'Space Mono', 'Courier New', monospace;
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  padding: 1px 5px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.kb-prose pre {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  margin: 16px 0;
+}
+
+.kb-prose pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 11px;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.kb-prose hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin: 24px 0;
+}
+
+.kb-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 12px;
+}
+
+.kb-prose th {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 10px;
+}
+
+.kb-prose td {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+  vertical-align: top;
+}
+
+.kb-prose tr:last-child td {
+  border-bottom: none;
+}
+
+.kb-prose img {
+  max-width: 100%;
+  border-radius: 4px;
+  margin: 12px 0;
+}
+

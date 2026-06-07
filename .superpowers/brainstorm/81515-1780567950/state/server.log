@@ -1,0 +1,4 @@
+{"type":"server-started","port":61211,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:61211","screen_dir":"/Users/ethan/Documents/Projects/Work/Bhutan/BIF MCP/.superpowers/brainstorm/81515-1780567950/content","state_dir":"/Users/ethan/Documents/Projects/Work/Bhutan/BIF MCP/.superpowers/brainstorm/81515-1780567950/state"}
+{"type":"screen-added","file":"/Users/ethan/Documents/Projects/Work/Bhutan/BIF MCP/.superpowers/brainstorm/81515-1780567950/content/homepage-direction.html"}
+{"type":"screen-added","file":"/Users/ethan/Documents/Projects/Work/Bhutan/BIF MCP/.superpowers/brainstorm/81515-1780567950/content/waiting.html"}
+{"type":"server-stopped","reason":"idle timeout"}
