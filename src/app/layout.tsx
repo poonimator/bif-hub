@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { Space_Mono, Public_Sans, DM_Mono } from 'next/font/google';
 import './globals.css';
-import CursorBlend from '@/components/CursorBlend';
 
 const spaceMono = Space_Mono({
   subsets: ['latin'],
@@ -41,7 +40,6 @@ export default function RootLayout({
     <html lang="en" data-view-mode="human" className={`${spaceMono.variable} ${publicSans.variable} ${dmMono.variable}`}>
       <body>
         {children}
-        <CursorBlend />
       </body>
     </html>
   );

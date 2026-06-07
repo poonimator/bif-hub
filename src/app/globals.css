@@ -77,12 +77,6 @@ body {
   background: #16150F;
 }
 
-/* Custom blended circle cursor (CursorBlend) replaces the native cursor on
-   pointer devices, so the only thing you see is the circle. */
-@media (pointer: fine) {
-  *, *::before, *::after { cursor: none !important; }
-}
-
 button, input, textarea, select {
   font-family: inherit;
 }
