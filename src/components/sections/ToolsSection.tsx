@@ -155,12 +155,12 @@ export default function ToolsSection() {
 
       <div style={{ maxWidth: 920, margin: '0 auto', padding: '120px 32px 80px', boxSizing: 'border-box' }}>
         {/* Intro */}
-        <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#8A8473', margin: 0 }}>The BIF MCP</p>
+        <p style={{ fontFamily: MONO, fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#8A8473', margin: 0 }}>LOOM</p>
         <h1 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(40px, 7vw, 88px)', lineHeight: '95%', letterSpacing: '-0.03em', margin: '16px 0 28px', color: '#16150F' }}>
           Bring the knowledge base into your AI.
         </h1>
         <div className="tools-prose">
-          <p>A <strong>Model Context Protocol (MCP) server</strong> plugs an external knowledge source straight into your AI assistant — instead of pasting context into the chat, your assistant fetches it on demand. The <strong>BIF MCP</strong> is a read-only knowledge base for the Bhutan Innovation Forum: connect it once and your assistant can search and retrieve the forum&apos;s curated documents — BIF24/BIF27 events and speakers, Gelephu Mindfulness City, brand guidelines, Bhutanese craft, and a library of writing &amp; creative skills — without you hunting them down.</p>
+          <p>A <strong>Model Context Protocol (MCP) server</strong> plugs an external knowledge source straight into your AI assistant — instead of pasting context into the chat, your assistant fetches it on demand. <strong>LOOM</strong> is a read-only knowledge base for the Bhutan Innovation Forum: connect it once and your assistant can search and retrieve the forum&apos;s curated documents — BIF24/BIF27 events and speakers, Gelephu Mindfulness City, brand guidelines, Bhutanese craft, and a library of writing &amp; creative skills — without you hunting them down.</p>
           <p>Use it whenever you want <strong>grounded, current, accurate BIF answers</strong>: session copy, speaker briefings, GMC explainers, delegate FAQs — drawn straight from the source. It&apos;s public and read-only, so no API keys or tokens are needed.</p>
         </div>
         <div style={{ background: '#16150F', borderRadius: 10, padding: '16px 20px', marginTop: 20 }}>
@@ -191,7 +191,7 @@ export default function ToolsSection() {
 
         {/* Skills */}
         <h2 style={{ fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(28px, 4vw, 44px)', letterSpacing: '-0.02em', margin: '72px 0 12px', color: '#16150F' }}>Skills</h2>
-        <p className="tools-prose" style={{ marginBottom: 28 }}>Nine instruction sets your AI can follow once the BIF MCP is connected. Each pulls the relevant facts from the knowledge base, then writes in BIF&apos;s voice.</p>
+        <p className="tools-prose" style={{ marginBottom: 28 }}>Nine instruction sets your AI can follow once LOOM is connected. Each pulls the relevant facts from the knowledge base, then writes in BIF&apos;s voice.</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {SKILLS.map((s) => (
             <div key={s.name} style={{ border: '1px solid rgba(0,0,0,0.1)', borderRadius: 12, padding: '22px 24px' }}>

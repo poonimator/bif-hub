@@ -11,7 +11,7 @@ const SECTIONS: Record<FooterSection, { label: string; href: string; poster: str
   website: { label: "Website", href: "/website", poster: "/website.webp", video: "/website-card.mp4" },
   vision: { label: "Vision", href: "/vision", poster: "/vision.webp", video: "/vision-card.mp4" },
   brand: { label: "Brand", href: "/brand", poster: "/brand.webp", video: "/brand-card.mp4" },
-  tools: { label: "Tools", href: "/tools", poster: "/tools.webp", video: "/tools-card.mp4" },
+  tools: { label: "LOOM", href: "/tools", poster: "/tools.webp", video: "/tools-card.mp4" },
 }
 
 const ORDER: FooterSection[] = ["website", "vision", "brand", "tools"]
@@ -50,7 +50,7 @@ export default function Footer({ current }: { current: FooterSection }) {
           maxWidth: 1512,
           margin: "0 auto",
           boxSizing: "border-box",
-          padding: isMobile ? "64px 24px 32px" : "96px 64px 32px",
+          padding: isMobile ? "64px 24px 88px" : "96px 64px 112px",
           opacity: flying ? 0 : 1,
           transition: "opacity 0.4s ease",
         }}
@@ -99,22 +99,6 @@ export default function Footer({ current }: { current: FooterSection }) {
           </div>
         </div>
 
-        <div style={{ height: 1, backgroundColor: "rgba(255,255,255,0.12)", margin: isMobile ? "40px 0 24px" : "56px 0 24px" }} />
-
-        {/* Credit — centred and sat on the same baseline (44px tall, 32px from
-            the bottom) as the fixed Ask Rigpai / Agent Mode buttons. */}
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: 44 }}>
-          <a
-            href="https://www.aleph-labs.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)", textDecoration: "none", transition: "color 0.2s", textAlign: "center" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.85)")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.45)")}
-          >
-            Designed &amp; Engineered by Aleph Labs
-          </a>
-        </div>
       </div>
 
       {/* Flying card — grows from its footer position to fullscreen, then navigates */}

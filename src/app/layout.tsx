@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Space_Mono, Public_Sans, DM_Mono } from 'next/font/google';
+import { Space_Mono, Public_Sans, DM_Mono, Space_Grotesk } from 'next/font/google';
 import './globals.css';
 
 const spaceMono = Space_Mono({
@@ -24,6 +24,14 @@ const dmMono = DM_Mono({
   display: 'swap',
 });
 
+// Space Grotesk — secondary display/body typeface in the brand system.
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--loaded-space-grotesk',
+  display: 'swap',
+});
+
 
 export const metadata: Metadata = {
   title: 'BIF 27',
@@ -37,7 +45,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" data-view-mode="human" className={`${spaceMono.variable} ${publicSans.variable} ${dmMono.variable}`}>
+    <html lang="en" data-view-mode="human" className={`${spaceMono.variable} ${publicSans.variable} ${dmMono.variable} ${spaceGrotesk.variable}`}>
       <body>
         {children}
       </body>

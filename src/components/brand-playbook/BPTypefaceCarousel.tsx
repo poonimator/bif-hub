@@ -1,24 +1,28 @@
 'use client'
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useIsMobile } from "../../hooks/useIsMobile";
 
 /**
- * BPTypefaceCarousel — Three-slide character set carousel
+ * BPTypefaceCarousel — three-slide type specimen that types out a pangram in
+ * each of the brand's typefaces. Replaces the old cursor-spotlight (which
+ * re-rendered the giant text on every mousemove and felt shaky).
  *
- * Slide 1 (Brasil — display)
- * Slide 2 (Space Mono — labels)
- * Slide 3 (Public Sans — body)
- *
- * Desktop: a cursor-following spotlight reveals red text over the character set.
+ * Slide 1 — Brasil        (display)
+ * Slide 2 — Space Grotesk (text)
+ * Slide 3 — DM Mono       (mono)
  */
 
-const SANS_TEXT    = "AaBbCcDdEeFfGg\nHhIiJjKkLlMmNn\nOoPpQqRrSsTtUu\nVvWwXxYyZz012\n356789!@#$^";
-const PUBLIC_TEXT  = "AaBbCcDdEeFfGg\nHhIiJjKkLlMmNn\nOoPpQqRrSsTtUu\nVvWwXxYyZz012\n356789!@#$^";
-// Cursor spotlight is masked to the BIF lion mark (the chat logo, 1:1).
-const LOGO_W = 560;
-const LOGO_H = 560;
+type Typeface = "sans" | "public" | "mono";
 
-type Typeface = "sans" | "mono" | "public";
+// Each typeface gets a true pangram — a meaningful sentence that exercises
+// every letter, which is exactly what a specimen is for.
+const SPECIMENS: Record<Typeface, { name: string; text: string; family: string }> = {
+  sans:   { name: "Brasil",        text: "The quick brown fox jumps over the lazy dog", family: "'Brasil', Georgia, serif" },
+  public: { name: "Space Grotesk", text: "Pack my box with five dozen liquor jugs",     family: "var(--loaded-space-grotesk), system-ui, sans-serif" },
+  mono:   { name: "DM Mono",       text: "How vexingly quick daft zebras jump",          family: "var(--loaded-dm-mono), ui-monospace, monospace" },
+};
+
+const ORDER: Typeface[] = ["sans", "public", "mono"];
 
 interface Props {
   fontWeight: number;
@@ -28,7 +32,6 @@ interface Props {
   activeTypeface: Typeface;
 }
 
-/* ── Arrow icons ── */
 const ChevronLeft = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -44,84 +47,62 @@ export default function BPTypefaceCarousel({ fontWeight, monoFontWeight, publicF
   const isMobile = useIsMobile();
   const [hoverLeft, setHoverLeft]   = useState(false);
   const [hoverRight, setHoverRight] = useState(false);
+  const [typed, setTyped] = useState("");
 
-  /* Spotlight cursor-follow state */
-  const [circlePos, setCirclePos] = useState({ x: 756, y: 350 });
-  const containerRef = useRef<HTMLDivElement>(null);
+  const idx = ORDER.indexOf(activeTypeface);
+  const isFirst = idx <= 0;
+  const isLast  = idx >= ORDER.length - 1;
+  const spec = SPECIMENS[activeTypeface];
+  const weight = activeTypeface === "sans" ? fontWeight : activeTypeface === "public" ? publicFontWeight : monoFontWeight;
 
-  const isFirst = activeTypeface === "sans";
-  const isLast  = activeTypeface === "public";
+  const goLeft  = () => { if (!isFirst) onTypefaceChange(ORDER[idx - 1]); };
+  const goRight = () => { if (!isLast)  onTypefaceChange(ORDER[idx + 1]); };
 
-  const goLeft = () => {
-    if (activeTypeface === "mono")   onTypefaceChange("sans");
-    if (activeTypeface === "public") onTypefaceChange("mono");
-  };
-  const goRight = () => {
-    if (activeTypeface === "sans") onTypefaceChange("mono");
-    if (activeTypeface === "mono") onTypefaceChange("public");
-  };
+  // Typewriter: retype whenever the active typeface changes.
+  const fullRef = useRef(spec.text);
+  fullRef.current = spec.text;
+  useEffect(() => {
+    const full = SPECIMENS[activeTypeface].text;
+    setTyped("");
+    let i = 0;
+    const id = window.setInterval(() => {
+      i += 1;
+      setTyped(full.slice(0, i));
+      if (i >= full.length) window.clearInterval(id);
+    }, 45);
+    return () => window.clearInterval(id);
+  }, [activeTypeface]);
 
-  /* Cursor-follow handler — position relative to the container */
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    setCirclePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-  };
-
-  /* ── Shared: navigation arrows ── */
   const ArrowNav = () => (
     <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "12px" }}>
-      <span
-        style={{
-          fontFamily: "'Public Sans', system-ui, sans-serif",
-          fontWeight: 400,
-          fontSize: "14px",
-          lineHeight: "20px",
-          color: "#8C8C8C",
-          letterSpacing: "0.05em",
-          marginRight: "8px",
-        }}
-      >
-        {activeTypeface === "sans" ? "01" : activeTypeface === "mono" ? "02" : "03"} / 03
+      <span style={{ fontFamily: "var(--loaded-dm-mono), monospace", fontSize: "13px", color: "#8C8C8C", letterSpacing: "0.08em", marginRight: "4px", textTransform: "uppercase" }}>
+        {spec.name}
       </span>
-
+      <span style={{ fontFamily: "var(--loaded-dm-mono), monospace", fontSize: "13px", color: "#8C8C8C", letterSpacing: "0.05em", marginRight: "8px" }}>
+        {String(idx + 1).padStart(2, "0")} / 03
+      </span>
       <button
-        onClick={goLeft}
-        disabled={isFirst}
-        aria-label="Previous typeface"
-        onMouseEnter={() => setHoverLeft(true)}
-        onMouseLeave={() => setHoverLeft(false)}
+        onClick={goLeft} disabled={isFirst} aria-label="Previous typeface"
+        onMouseEnter={() => setHoverLeft(true)} onMouseLeave={() => setHoverLeft(false)}
         style={{
-          width: "48px", height: "48px",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          borderRadius: "50%",
-          border: `1px solid ${isFirst ? "#D1D0CC" : "#242424"}`,
+          width: "48px", height: "48px", display: "flex", alignItems: "center", justifyContent: "center",
+          borderRadius: "50%", border: `1px solid ${isFirst ? "#D1D0CC" : "#242424"}`,
           backgroundColor: hoverLeft && !isFirst ? "#242424" : "transparent",
           color: isFirst ? "#D1D0CC" : hoverLeft ? "#FFFFFF" : "#242424",
-          cursor: isFirst ? "not-allowed" : "pointer",
-          transition: "background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease",
-          flexShrink: 0,
+          cursor: isFirst ? "not-allowed" : "pointer", transition: "all 0.2s ease", flexShrink: 0,
         }}
       >
         <ChevronLeft />
       </button>
-
       <button
-        onClick={goRight}
-        disabled={isLast}
-        aria-label="Next typeface"
-        onMouseEnter={() => setHoverRight(true)}
-        onMouseLeave={() => setHoverRight(false)}
+        onClick={goRight} disabled={isLast} aria-label="Next typeface"
+        onMouseEnter={() => setHoverRight(true)} onMouseLeave={() => setHoverRight(false)}
         style={{
-          width: "48px", height: "48px",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          borderRadius: "50%",
-          border: `1px solid ${isLast ? "#D1D0CC" : "#242424"}`,
+          width: "48px", height: "48px", display: "flex", alignItems: "center", justifyContent: "center",
+          borderRadius: "50%", border: `1px solid ${isLast ? "#D1D0CC" : "#242424"}`,
           backgroundColor: hoverRight && !isLast ? "#242424" : "transparent",
           color: isLast ? "#D1D0CC" : hoverRight ? "#FFFFFF" : "#242424",
-          cursor: isLast ? "not-allowed" : "pointer",
-          transition: "background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease",
-          flexShrink: 0,
+          cursor: isLast ? "not-allowed" : "pointer", transition: "all 0.2s ease", flexShrink: 0,
         }}
       >
         <ChevronRight />
@@ -129,151 +110,42 @@ export default function BPTypefaceCarousel({ fontWeight, monoFontWeight, publicF
     </div>
   );
 
-  /* ── Mobile layout — no spotlight ── */
-  if (isMobile) {
-    return (
-      <section
-        style={{
-          backgroundColor: "#F4F3EF",
-          width: "100%",
-          padding: "32px 24px 48px",
-          boxSizing: "border-box",
-          display: "flex",
-          flexDirection: "column",
-          gap: "32px",
-        }}
-      >
-        <p
-          style={{
-            fontFamily: activeTypeface === "public"
-              ? "'Public Sans', system-ui, sans-serif"
-              : activeTypeface === "mono"
-              ? "'Space Mono', monospace"
-              : "'Brasil', Georgia, serif",
-            fontWeight: activeTypeface === "public" ? publicFontWeight
-              : activeTypeface === "mono" ? monoFontWeight
-              : fontWeight,
-            fontSize: "48px",
-            lineHeight: "58px",
-            letterSpacing: "-0.03em",
-            margin: 0,
-            width: "100%",
-          }}
-        >
-          {activeTypeface === "sans" && (
-            <span style={{ color: "#242424" }}>{"AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz012356789!@#$^"}</span>
-          )}
-          {activeTypeface === "mono" && (
-            <span style={{ color: "#242424" }}>{"AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz012356789@#$^"}</span>
-          )}
-          {activeTypeface === "public" && (
-            <span style={{ color: "#242424" }}>{"AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz012356789!@#$^"}</span>
-          )}
-        </p>
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-          <ArrowNav />
-        </div>
-      </section>
-    );
-  }
-
-  /* ── Desktop: shared content & text styles for all four slides ── */
-  const textContent = activeTypeface === "sans"   ? SANS_TEXT
-    : activeTypeface === "mono"   ? "AaBbCcDdEeFfG\ngHhIiJjKkLlMm\nNnOoPpQqRrSsT\ntUuVvWwXxYyZz\n012356789@#$^"
-    : PUBLIC_TEXT;
-
-  const textStyle: React.CSSProperties = {
-    fontFamily: activeTypeface === "public" ? "'Public Sans', system-ui, sans-serif"
-      : activeTypeface === "mono"   ? "'Space Mono', monospace"
-      : "'Brasil', Georgia, serif",
-    fontWeight: activeTypeface === "public" ? publicFontWeight
-      : activeTypeface === "mono"   ? monoFontWeight
-      : fontWeight,
-    fontSize:      "175px",
-    lineHeight:    "200px",
-    letterSpacing: "-0.03em",
-    margin:        0,
-    width:         "100%",
-    whiteSpace:    "pre-wrap",
-  };
-
   return (
-    <section
-      style={{
-        backgroundColor: "#F4F3EF",
-        width:           "100%",
-        paddingBottom:   "128px",
-        boxSizing:       "border-box",
-      }}
-    >
-      {/* Nav row — kept inside the 64px margins */}
-      <div
-        style={{
-          paddingTop:   "40px",
-          paddingBottom: "40px",
-          paddingLeft:  "64px",
-          paddingRight: "64px",
-          display:      "flex",
-          justifyContent: "flex-end",
-        }}
-      >
+    <section style={{ backgroundColor: "#F4F3EF", width: "100%", paddingBottom: isMobile ? "48px" : "112px", boxSizing: "border-box" }}>
+      <style>{`@keyframes bpCaretBlink { 0%,49%{opacity:1} 50%,100%{opacity:0} }`}</style>
+
+      <div style={{ padding: isMobile ? "32px 24px" : "40px 64px", display: "flex", justifyContent: "flex-end" }}>
         <ArrowNav />
       </div>
 
-      {/*
-       * Cursor-follow container — full section width, no horizontal padding.
-       * The 64px letter margin lives on the <p> elements inside.
-       */}
-      <div
-        ref={containerRef}
-        onMouseMove={handleMouseMove}
-        style={{
-          position: "relative",
-          cursor:   "none",
-        }}
-      >
-        {/* Base layer — dark text, 64px side padding */}
-        <p style={{ ...textStyle, color: "#242424", paddingLeft: "64px", paddingRight: "64px" }}>
-          {textContent}
-        </p>
-
-        {/*
-         * Spotlight overlay — full width (no horizontal padding on the div).
-         * Masked to the BIF logo silhouette, which follows the cursor, so the
-         * red text is revealed through a logo-shaped window instead of a square.
-         * The light <p> keeps 64px padding so letters align with the base layer.
-         */}
-        <div
+      <div style={{ padding: isMobile ? "0 24px" : "0 64px", minHeight: isMobile ? "40vh" : "46vh", display: "flex", alignItems: "center" }}>
+        <p
+          aria-label={spec.text}
           style={{
-            position:           "absolute",
-            inset:              0,
-            maskImage:          "url(/bif-logo.svg)",
-            WebkitMaskImage:    "url(/bif-logo.svg)",
-            maskRepeat:         "no-repeat",
-            WebkitMaskRepeat:   "no-repeat",
-            maskSize:           `${LOGO_W}px ${LOGO_H}px`,
-            WebkitMaskSize:     `${LOGO_W}px ${LOGO_H}px`,
-            maskPosition:       `${circlePos.x - LOGO_W / 2}px ${circlePos.y - LOGO_H / 2}px`,
-            WebkitMaskPosition: `${circlePos.x - LOGO_W / 2}px ${circlePos.y - LOGO_H / 2}px`,
-            pointerEvents:      "none",
+            fontFamily: spec.family,
+            fontWeight: weight,
+            fontSize: isMobile ? "clamp(30px, 9vw, 44px)" : "clamp(48px, 6.4vw, 104px)",
+            lineHeight: 1.06,
+            letterSpacing: "-0.02em",
+            margin: 0,
+            color: "#242424",
+            width: "100%",
           }}
         >
-          {/* Dark fill */}
-          <div style={{ position: "absolute", inset: 0, backgroundColor: "#1A1A1A" }} />
-
-          {/* Highlight text — same padding as base so it sits exactly on top */}
-          <p
+          {typed}
+          <span
+            aria-hidden="true"
             style={{
-              ...textStyle,
-              color:        "#BB3308",
-              paddingLeft:  "64px",
-              paddingRight: "64px",
-              position:     "relative", /* renders above dark fill */
+              display: "inline-block",
+              width: "0.06em",
+              height: "0.92em",
+              marginLeft: "0.06em",
+              transform: "translateY(0.1em)",
+              backgroundColor: "#BB3308",
+              animation: "bpCaretBlink 1s step-end infinite",
             }}
-          >
-            {textContent}
-          </p>
-        </div>
+          />
+        </p>
       </div>
     </section>
   );

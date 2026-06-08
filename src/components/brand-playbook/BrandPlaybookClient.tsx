@@ -12,7 +12,6 @@ import BPColourMosaic from "./BPColourMosaic";
 import BPChineseTypefaceHeader from "./BPChineseTypefaceHeader";
 import BPChineseTypefaceSpecimen from "./BPChineseTypefaceSpecimen";
 import BPInsitu from "./BPInsitu";
-import BPClosingStatement from "./BPClosingStatement";
 import PageReveal from "../PageReveal";
 
 /**
@@ -88,9 +87,6 @@ export default function BrandPlaybookClient() {
 
       {/* ── In-situ mockup — day → night on scroll ── */}
       <BPInsitu />
-
-      {/* ── Closing statement ── */}
-      <BPClosingStatement />
       </PageReveal>
     </main>
   );

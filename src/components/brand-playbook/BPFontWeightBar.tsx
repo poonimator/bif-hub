@@ -152,8 +152,7 @@ export default function BPFontWeightBar({ weight, onWeightChange, monoWeight, on
         </div>
         {/* Download button — label and href swap based on active typeface */}
         <a
-          href={isPublic ? "https://fonts.google.com/specimen/Public+Sans" : isMono ? "https://fonts.google.com/specimen/Space+Mono" : undefined}
-          aria-disabled={!isPublic && !isMono}
+          href={isPublic ? "https://fonts.google.com/specimen/Space+Grotesk" : isMono ? "https://fonts.google.com/specimen/DM+Mono" : "/brasil-font.zip"}
           target="_blank"
           rel="noopener noreferrer"
           style={{
@@ -175,7 +174,7 @@ export default function BPFontWeightBar({ weight, onWeightChange, monoWeight, on
           onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#8F2706")}
           onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#BB3308")}
         >
-          {isPublic ? "Download Public Sans" : isMono ? "Download Space Mono" : "Download Brasil"}
+          {isPublic ? "Download Space Grotesk" : isMono ? "Download DM Mono" : "Download Brasil"}
           <ArrowIcon />
         </a>
       </section>
@@ -291,8 +290,7 @@ export default function BPFontWeightBar({ weight, onWeightChange, monoWeight, on
 
         {/* ── Right: Download button — label swaps with active typeface ── */}
         <a
-          href={isPublic ? "https://fonts.google.com/specimen/Public+Sans" : isMono ? "https://fonts.google.com/specimen/Space+Mono" : undefined}
-          aria-disabled={!isPublic && !isMono}
+          href={isPublic ? "https://fonts.google.com/specimen/Space+Grotesk" : isMono ? "https://fonts.google.com/specimen/DM+Mono" : "/brasil-font.zip"}
           target="_blank"
           rel="noopener noreferrer"
           style={{
@@ -314,7 +312,7 @@ export default function BPFontWeightBar({ weight, onWeightChange, monoWeight, on
           onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#8F2706")}
           onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#BB3308")}
         >
-          {isPublic ? "Download Public Sans" : isMono ? "Download Space Mono" : "Download Brasil"}
+          {isPublic ? "Download Space Grotesk" : isMono ? "Download DM Mono" : "Download Brasil"}
           <ArrowIcon />
         </a>
       </div>

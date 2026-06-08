@@ -33,8 +33,8 @@ const SECTION_CHAT: Record<string, ChatContext> = {
     suggestions: ['What is BIF?', 'When and where is BIF27?', 'Who is speaking at BIF?'],
   },
   tools: {
-    intro: "Hey — I'm Rigpai. Ask me anything about the BIF tools and MCP.",
-    suggestions: ['What is the BIF MCP?', 'How do I install it?', 'What skills are available?'],
+    intro: "Hey — I'm Rigpai. Ask me anything about LOOM, the BIF knowledge base.",
+    suggestions: ['What is LOOM?', 'How do I install it?', 'What skills are available?'],
   },
 }
 
