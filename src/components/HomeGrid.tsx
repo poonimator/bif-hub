@@ -201,6 +201,7 @@ export default function HomeGrid({ isAgent = false, onSectionChange }: HomeGridP
               labelLeft={card.labelLeft}
               labelRight={card.labelRight}
               comingSoon={card.comingSoon}
+              videoPlaying={!activeSection || isClosing}
               imagePosition={card.imagePosition}
               href={card.href}
             />

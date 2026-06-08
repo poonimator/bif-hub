@@ -69,17 +69,25 @@ export default function ZoomShell({
   const btnOffset = lerp(BTN_START, BTN_END, t);
   const btnScale  = lerp(1, 0.8, t);
 
+  // Keep the button's live position in refs so the (throttled) contrast probe
+  // can read it without re-subscribing every animation frame.
+  const btnPos = useRef({ offset: btnOffset, scale: btnScale });
+  btnPos.current = { offset: btnOffset, scale: btnScale };
+
   // Back button auto-contrast: sample the background directly behind the button
-  // and pick a dark icon on light backgrounds, a light icon on dark ones. Runs
-  // whenever the scroll position changes (and once on mount, after the open
-  // animation settles).
+  // and pick a dark icon on light backgrounds, a light icon on dark ones.
+  // elementsFromPoint + getComputedStyle force a synchronous layout, so we only
+  // re-probe when scroll crosses a ~150px bucket (not every frame) — this keeps
+  // long section pages smooth while still updating across light/dark bands.
+  const sampleBucket = Math.round(scrollTop / 150);
   useEffect(() => {
     let raf = 0;
     const sample = () => {
       raf = 0;
       if (typeof document === 'undefined') return;
-      const cx = btnOffset + 22 * btnScale;
-      const cy = btnOffset + 22 * btnScale;
+      const { offset, scale } = btnPos.current;
+      const cx = offset + 22 * scale;
+      const cy = offset + 22 * scale;
       const els = document.elementsFromPoint(cx, cy);
       for (const el of els) {
         const he = el as HTMLElement;
@@ -99,7 +107,7 @@ export default function ZoomShell({
       if (raf) cancelAnimationFrame(raf);
       clearTimeout(settle);
     };
-  }, [scrollTop, btnOffset, btnScale]);
+  }, [sampleBucket]);
 
   return (
     <>

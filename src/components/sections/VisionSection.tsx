@@ -65,16 +65,16 @@ const PILLARS = [
 type Tile = { type: 'img'; n: number } | { type: 'text'; idx: number };
 
 /** A flowing 4-column masonry — original aspect ratios, no cropping. */
-function Masonry({ tiles }: { tiles: Tile[] }) {
+function Masonry({ tiles, bg = DARK }: { tiles: Tile[]; bg?: string }) {
   return (
     <motion.div
       initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true, amount: 0.1 }} transition={{ duration: 0.9, ease }}
-      style={{ background: DARK, padding: 'clamp(40px, 6vw, 88px) clamp(12px, 2vw, 24px)' }}
+      style={{ background: bg, padding: 'clamp(40px, 6vw, 88px) clamp(12px, 2vw, 24px)' }}
     >
       <div className="va-masonry">
         {tiles.map((t, i) =>
           t.type === 'img' ? (
-            <img key={`i${i}`} src={IMG(t.n)} alt="" aria-hidden="true" loading="lazy" />
+            <img key={`i${i}`} src={IMG(t.n)} alt="" aria-hidden="true" loading="lazy" decoding="async" />
           ) : (
             <div key={`t${i}`} className="va-tile" style={{ background: PILLARS[t.idx].bg, color: PILLARS[t.idx].color }}>
               <h3>{PILLARS[t.idx].name}</h3>
@@ -112,7 +112,7 @@ export default function VisionSection() {
           .va-masonry { column-count: 4; column-gap: 14px; }
           .va-masonry > * { break-inside: avoid; margin-bottom: 14px; }
           .va-masonry img { width: 100%; height: auto; display: block; border-radius: 6px; }
-          .va-tile { border-radius: 6px; padding: clamp(20px, 1.6vw, 28px); }
+          .va-tile { border-radius: 6px; padding: clamp(20px, 1.6vw, 28px); border: 1px solid rgba(0,0,0,0.1); }
           .va-tile h3 { font-family: ${SERIF}; font-weight: 500; font-size: clamp(20px, 1.5vw, 26px); letter-spacing: -0.01em; margin: 0 0 12px; }
           .va-tile p { font-family: ${BODY}; font-size: 14px; line-height: 1.6; margin: 0; }
           @media (max-width: 1100px) { .va-masonry { column-count: 3; } }
@@ -145,14 +145,14 @@ export default function VisionSection() {
         </section>
 
         {/* 4 — merged: thesis + conclusion */}
-        <Block bg={DARK} color={PAPER} lines={[
+        <Block bg={PAPER} color={INK} lines={[
           { text: 'Progress should be measured not by the intelligence of our systems, but by the flourishing of our people.', highlight: ['flourishing', 'people'] },
           { text: 'Not by what we produce, but by what we become. This is Human Abundance.', highlight: ['become', 'human', 'abundance'] },
         ]} />
 
         {/* Masonry B — end of the page, with pillar tiles woven in */}
-        <div style={{ paddingBottom: 'clamp(64px, 10vw, 140px)' }}>
-          <Masonry tiles={TILES_B} />
+        <div style={{ paddingBottom: 'clamp(64px, 10vw, 140px)', background: PAPER }}>
+          <Masonry tiles={TILES_B} bg={PAPER} />
         </div>
       </div>
     </PageReveal>

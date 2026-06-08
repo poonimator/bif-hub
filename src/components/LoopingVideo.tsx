@@ -15,9 +15,10 @@ interface LoopingVideoProps {
   style?: React.CSSProperties;
   playbackRate?: number;     // 1 = normal speed; <1 slows the footage
   crossfadeSeconds?: number; // wall-clock length of the loop dissolve
+  playing?: boolean;         // false → pause both videos + stop the rAF loop
 }
 
-export default function LoopingVideo({ src, poster, className, style, playbackRate = 0.6, crossfadeSeconds = 2 }: LoopingVideoProps) {
+export default function LoopingVideo({ src, poster, className, style, playbackRate = 0.6, crossfadeSeconds = 2, playing = true }: LoopingVideoProps) {
   const aRef = useRef<HTMLVideoElement>(null);
   const bRef = useRef<HTMLVideoElement>(null);
   const active = useRef<'a' | 'b'>('a');
@@ -28,6 +29,8 @@ export default function LoopingVideo({ src, poster, className, style, playbackRa
     const a = aRef.current;
     const b = bRef.current;
     if (!a || !b) return;
+    // Paused (e.g. a section overlay covers the grid): stop decoding entirely.
+    if (!playing) { a.pause(); b.pause(); return; }
 
     const rate = playbackRate;
     const CROSSFADE = crossfadeSeconds * rate; // window measured in video-time
@@ -102,7 +105,7 @@ export default function LoopingVideo({ src, poster, className, style, playbackRa
 
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [src, callerZ, playbackRate, crossfadeSeconds]);
+  }, [src, callerZ, playbackRate, crossfadeSeconds, playing]);
 
   // Strip opacity/animation/zIndex from caller — we own those entirely
   const { opacity: _o, animation: _a, zIndex: _z, ...passthroughStyle } = style ?? {};

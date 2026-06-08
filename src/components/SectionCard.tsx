@@ -21,6 +21,8 @@ interface SectionCardProps {
   labelLeft?: string;
   labelRight?: string;
   comingSoon?: boolean;
+  /** false → pause the card's background video (e.g. a section is open). */
+  videoPlaying?: boolean;
   /** object-position for the background image (default 'center top'). */
   imagePosition?: string;
   /** If set, the card navigates to this URL instead of zooming into a section. */
@@ -43,6 +45,7 @@ export default function SectionCard({
   labelLeft,
   labelRight,
   comingSoon = false,
+  videoPlaying = true,
   imagePosition = 'center top',
   href,
 }: SectionCardProps) {
@@ -80,7 +83,7 @@ export default function SectionCard({
 
       {/* Animated video — crossfades seamlessly at loop point */}
       {backgroundVideo && (
-        <LoopingVideo src={backgroundVideo} style={{ zIndex: 1 }} />
+        <LoopingVideo src={backgroundVideo} playing={videoPlaying} style={{ zIndex: 1 }} />
       )}
 
       {/* Vignette */}
