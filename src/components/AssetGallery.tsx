@@ -54,6 +54,12 @@ export default function AssetGallery() {
 
   return (
     <div style={{ width: '100%', maxWidth: 920, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 48 }}>
+      <style>{`
+        .ag-vibes { column-count: 4; column-gap: 12px; }
+        .ag-vibes > * { break-inside: avoid; margin-bottom: 12px; width: 100%; }
+        @media (max-width: 720px) { .ag-vibes { column-count: 3; } }
+        @media (max-width: 480px) { .ag-vibes { column-count: 2; } }
+      `}</style>
       {/* Logos — dark + light swatches */}
       {by('logo').length > 0 && (
         <section>
@@ -95,16 +101,17 @@ export default function AssetGallery() {
       {by('vibe').length > 0 && (
         <section>
           <Label>Vibes</Label>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
+          <div className="ag-vibes">
             {by('vibe').map((a) => (
-              <button key={a.id} title={tip(a.id, `${a.name} — ${a.tags.join(', ')}`)} onClick={() => copy(a.url, a.id)} style={{ ...btnReset, borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <button key={a.id} title={tip(a.id, `${a.name} — ${a.tags.join(', ')}`)} onClick={() => copy(a.url, a.id)} style={{ ...btnReset, display: 'block', borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)' }}>
                 <img
                   src={a.url}
                   alt={a.name}
                   width={a.width}
                   height={a.height}
                   loading="lazy"
-                  style={{ width: '100%', height: 'auto', display: 'block', aspectRatio: a.width && a.height ? `${a.width} / ${a.height}` : undefined, objectFit: 'cover', background: '#1a1813' }}
+                  decoding="async"
+                  style={{ width: '100%', height: 'auto', display: 'block', background: '#1a1813' }}
                 />
               </button>
             ))}
