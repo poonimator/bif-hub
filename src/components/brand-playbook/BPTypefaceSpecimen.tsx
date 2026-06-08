@@ -170,8 +170,8 @@ export default function BPTypefaceSpecimen() {
       <span style={{ whiteSpace: "nowrap", flexShrink: 0 }}>
         {renderSlot(0, "#17FF3E", "'Brasil', Georgia, serif", 500)}
         {renderSlot(1, "#FFFFFF", "'Brasil', Georgia, serif", 500)}
-        {renderSlot(2, "#17FF3E", "'Space Mono', monospace",  400)}
-        {renderSlot(3, "#FFFFFF", "'Space Mono', monospace",  400)}
+        {renderSlot(2, "#17FF3E", "'Brasil', Georgia, serif", 500)}
+        {renderSlot(3, "#FFFFFF", "'Brasil', Georgia, serif", 500)}
       </span>
     );
   };

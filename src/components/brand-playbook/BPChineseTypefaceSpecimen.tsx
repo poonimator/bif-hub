@@ -161,13 +161,14 @@ export default function BPChineseTypefaceSpecimen() {
       );
     };
 
-    const PUBLIC = "'Public Sans', system-ui, sans-serif";
+    const SPACE = "var(--loaded-space-grotesk), system-ui, sans-serif";
+    const DM = "var(--loaded-dm-mono), ui-monospace, monospace";
     return (
       <span style={{ whiteSpace: "nowrap", flexShrink: 0, ["--fs" as string]: fsExpr } as React.CSSProperties}>
-        {renderSlot(0, "#17FF3E", PUBLIC, false)}
-        {renderSlot(1, "#FFFFFF", PUBLIC, false)}
-        {renderSlot(2, "#17FF3E", PUBLIC, true)}
-        {renderSlot(3, "#FFFFFF", PUBLIC, true)}
+        {renderSlot(0, "#51C8FF", SPACE, false)}
+        {renderSlot(1, "#51C8FF", SPACE, false)}
+        {renderSlot(2, "#BB3308", DM, true)}
+        {renderSlot(3, "#BB3308", DM, true)}
       </span>
     );
   };

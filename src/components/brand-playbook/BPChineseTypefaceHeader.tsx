@@ -32,7 +32,7 @@ export default function BPChineseTypefaceHeader() {
             color: "#ffffff",
           }}
         >
-          Public Sans
+          Space Grotesk · DM Mono
         </span>
       </section>
     );
@@ -67,7 +67,7 @@ export default function BPChineseTypefaceHeader() {
           whiteSpace: "nowrap",
         }}
       >
-        Public Sans
+        Space Grotesk · DM Mono
       </span>
     </section>
   );

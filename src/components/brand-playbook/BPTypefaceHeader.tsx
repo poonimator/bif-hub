@@ -51,7 +51,7 @@ export default function BPTypefaceHeader() {
             color: "#ffffff",
           }}
         >
-          Space Mono
+          Display
         </span>
       </section>
     );
@@ -119,7 +119,7 @@ export default function BPTypefaceHeader() {
           whiteSpace: "nowrap",
         }}
       >
-        Space Mono
+        Display
       </span>
     </section>
   );

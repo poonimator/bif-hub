@@ -19,16 +19,17 @@ export default function AgentToggle({ isAgent, onToggle }: AgentToggleProps) {
       transition={spring}
       className="t-ui flex items-center cursor-pointer border-0 bg-transparent whitespace-nowrap"
       style={{
-        color: isAgent ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.6)',
+        color: isAgent ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.55)',
         padding: 0,
-        height: 44,
-        gap: 8,
+        fontSize: 10,
+        letterSpacing: '0.1em',
+        gap: 6,
       }}
       aria-label={isAgent ? 'Switch to human view' : 'Switch to agent view'}
     >
       {isAgent
-        ? <User size={16} weight="regular" style={{ opacity: 0.8 }} />
-        : <Robot size={16} weight="regular" style={{ opacity: 0.8 }} />}
+        ? <User size={13} weight="regular" style={{ opacity: 0.8 }} />
+        : <Robot size={13} weight="regular" style={{ opacity: 0.8 }} />}
       {isAgent ? 'Human Mode' : 'Agent Mode'}
     </motion.button>
   );

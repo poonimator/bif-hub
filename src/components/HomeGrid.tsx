@@ -124,13 +124,16 @@ export default function HomeGrid({ isAgent = false, onSectionChange }: HomeGridP
   const cardCx = flyingRect ? flyingRect.left + flyingRect.width / 2 : 0;
   const cardCy = flyingRect ? flyingRect.top + flyingRect.height / 2 : 0;
 
-  // Clip window: card rect (initial/closing) → padded card → fullscreen.
+  // Clip window: card rect (initial) → padded card → fullscreen. On close we
+  // keep it full and slide the whole panel down instead of zooming back.
   const clip = flyingRect
-    ? !isZoomed
-      ? `inset(${flyingRect.top}px ${flyingRect.vw - flyingRect.left - flyingRect.width}px ${flyingRect.vh - flyingRect.top - flyingRect.height}px ${flyingRect.left}px round 4px)`
-      : isFullscreen
-        ? 'inset(0px round 0px)'
-        : 'inset(32px round 22px)'
+    ? isClosing
+      ? 'inset(0px round 0px)'
+      : !isZoomed
+        ? `inset(${flyingRect.top}px ${flyingRect.vw - flyingRect.left - flyingRect.width}px ${flyingRect.vh - flyingRect.top - flyingRect.height}px ${flyingRect.left}px round 4px)`
+        : isFullscreen
+          ? 'inset(0px round 0px)'
+          : 'inset(32px round 22px)'
     : 'none';
 
   const flyingStyle: React.CSSProperties = flyingRect
@@ -146,7 +149,11 @@ export default function HomeGrid({ isAgent = false, onSectionChange }: HomeGridP
         background: activeSection ? SECTION_BG[activeSection] : 'transparent',
         clipPath: clip,
         WebkitClipPath: clip,
-        transition: 'clip-path 0.6s cubic-bezier(0.16,1,0.3,1), -webkit-clip-path 0.6s cubic-bezier(0.16,1,0.3,1)',
+        // Slide the whole section down on close.
+        transform: isClosing ? 'translateY(100vh)' : 'none',
+        transition: isClosing
+          ? 'transform 0.5s cubic-bezier(0.4,0,1,1)'
+          : 'clip-path 0.6s cubic-bezier(0.16,1,0.3,1), -webkit-clip-path 0.6s cubic-bezier(0.16,1,0.3,1)',
         pointerEvents: isZoomed ? 'all' : 'none',
       }
     : {};
@@ -156,7 +163,7 @@ export default function HomeGrid({ isAgent = false, onSectionChange }: HomeGridP
     position: 'absolute',
     inset: 0,
     zIndex: 0,
-    transform: `scale(${isZoomed ? 1 : heroScale})`,
+    transform: `scale(${(isZoomed || isClosing) ? 1 : heroScale})`,
     transformOrigin: `${cardCx}px ${cardCy}px`,
     transition: 'transform 0.6s cubic-bezier(0.16,1,0.3,1)',
     willChange: 'transform',

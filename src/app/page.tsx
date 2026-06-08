@@ -22,13 +22,30 @@ export default function Home() {
   // When a section is open, agent mode shows an in-section overlay (handled by
   // HomeGrid) rather than swapping to the full KB browser.
   const showKBBrowser = isAgent && !activeSection;
+  // Hide the top chrome (dragon, divider, agent toggle) once a card is open.
+  const sectionOpen = activeSection !== null;
+  const chromeHidden = { opacity: sectionOpen ? 0 : 1, pointerEvents: (sectionOpen ? 'none' : 'auto') as React.CSSProperties['pointerEvents'], transition: 'opacity 0.3s ease' };
 
   return (
     <>
-      {/* Small dragon mark — top left */}
-      <a href="/" aria-label="Bhutan Innovation Festival Hub" className="fixed z-[300]" style={{ top: 28, left: 32, lineHeight: 0 }}>
-        <img src="/bif-logo.svg" alt="" aria-hidden="true" style={{ width: 34, height: 34 }} />
+      {/* Small white dragon mark — top left */}
+      <a href="/" aria-label="Bhutan Innovation Festival Hub" className="fixed z-[300]" style={{ top: 30, left: 32, lineHeight: 0, ...chromeHidden }}>
+        <span
+          aria-hidden="true"
+          style={{
+            display: 'block', width: 26, height: 26, background: '#ffffff',
+            WebkitMask: 'url(/bif-logo.svg) center / contain no-repeat',
+            mask: 'url(/bif-logo.svg) center / contain no-repeat',
+          }}
+        />
       </a>
+
+      {/* Low-opacity divider under the header row */}
+      <div
+        aria-hidden="true"
+        className="fixed z-[300] pointer-events-none"
+        style={{ top: 70, left: 32, right: 32, height: 1, background: 'rgba(255,255,255,0.12)', opacity: sectionOpen ? 0 : 1, transition: 'opacity 0.3s ease' }}
+      />
 
       <p
         className="t-label fixed pointer-events-none"
@@ -66,7 +83,7 @@ export default function Home() {
         <ChatBar mode={chatMode} setMode={setChatMode} section={activeSection} />
       </div>
       {/* Agent toggle — top right, plain symbol + text */}
-      <div className="fixed z-[300]" style={{ top: 28, right: 32 }}>
+      <div className="fixed z-[300]" style={{ top: 30, right: 32, ...chromeHidden }}>
         <AgentToggle isAgent={isAgent} onToggle={toggleAgent} />
       </div>
     </>
