@@ -135,7 +135,7 @@ export default function VisionSection() {
         <Masonry tiles={TILES_A} />
 
         {/* 3 — the scarce, human things: centered paragraph */}
-        <section style={{ background: PAPER, color: INK, padding: 'clamp(80px, 12vw, 180px) clamp(24px, 5vw, 80px)' }}>
+        <section style={{ background: DARK, color: PAPER, padding: 'clamp(80px, 12vw, 180px) clamp(24px, 5vw, 80px)' }}>
           <motion.p
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.6 }} transition={{ duration: 0.8, ease }}
             style={{ maxWidth: 760, margin: '0 auto', textAlign: 'center', fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(20px, 2.4vw, 32px)', lineHeight: 1.4, letterSpacing: '-0.01em' }}
