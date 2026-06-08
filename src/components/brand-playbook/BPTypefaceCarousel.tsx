@@ -61,18 +61,19 @@ export default function BPTypefaceCarousel() {
         input[type=range].bp-tt::-moz-range-thumb { width:16px; height:16px; border-radius:50%; background:#242424; border:none; cursor:pointer; }
       `}</style>
 
-      {/* Font toggle — aligned left */}
-      <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 12 }}>
-        <span style={{ fontFamily: "var(--loaded-dm-mono), monospace", fontSize: 13, color: "#8C8C8C", letterSpacing: "0.08em", textTransform: "uppercase", marginRight: 4 }}>{font.name}</span>
-        <span style={{ fontFamily: "var(--loaded-dm-mono), monospace", fontSize: 13, color: "#8C8C8C", letterSpacing: "0.05em", marginRight: 8 }}>{String(i + 1).padStart(2, "0")} / 0{FONTS.length}</span>
-        <button onClick={() => !isFirst && select(i - 1)} disabled={isFirst} aria-label="Previous typeface" onMouseEnter={() => setHoverL(true)} onMouseLeave={() => setHoverL(false)} style={arrowStyle(isFirst, hoverL)}><ChevronLeft /></button>
-        <button onClick={() => !isLast && select(i + 1)} disabled={isLast} aria-label="Next typeface" onMouseEnter={() => setHoverR(true)} onMouseLeave={() => setHoverR(false)} style={arrowStyle(isLast, hoverR)}><ChevronRight /></button>
-      </div>
+      {/* Controls — toggle · weight slider · download, all on one line (desktop) */}
+      <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "flex-start" : "center", gap: isMobile ? 24 : 32, margin: "0 0 40px" }}>
+        {/* Font toggle */}
+        <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 12, flexShrink: 0 }}>
+          <span style={{ fontFamily: "var(--loaded-dm-mono), monospace", fontSize: 13, color: "#8C8C8C", letterSpacing: "0.08em", textTransform: "uppercase", marginRight: 4 }}>{font.name}</span>
+          <span style={{ fontFamily: "var(--loaded-dm-mono), monospace", fontSize: 13, color: "#8C8C8C", letterSpacing: "0.05em", marginRight: 8 }}>{String(i + 1).padStart(2, "0")} / 0{FONTS.length}</span>
+          <button onClick={() => !isFirst && select(i - 1)} disabled={isFirst} aria-label="Previous typeface" onMouseEnter={() => setHoverL(true)} onMouseLeave={() => setHoverL(false)} style={arrowStyle(isFirst, hoverL)}><ChevronLeft /></button>
+          <button onClick={() => !isLast && select(i + 1)} disabled={isLast} aria-label="Next typeface" onMouseEnter={() => setHoverR(true)} onMouseLeave={() => setHoverR(false)} style={arrowStyle(isLast, hoverR)}><ChevronRight /></button>
+        </div>
 
-      {/* Weight slider + download — directly under the toggle */}
-      <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "flex-start" : "center", gap: isMobile ? 20 : 32, margin: "28px 0 40px" }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <span style={{ fontFamily: "var(--loaded-dm-mono), monospace", fontSize: 13, color: "#8C8C8C", letterSpacing: "0.05em" }}>Weight — {weight}</span>
+        {/* Weight slider */}
+        <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 14, flexShrink: 0 }}>
+          <span style={{ fontFamily: "var(--loaded-dm-mono), monospace", fontSize: 13, color: "#8C8C8C", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>Weight — {weight}</span>
           <input
             className="bp-tt"
             type="range"
@@ -85,11 +86,13 @@ export default function BPTypefaceCarousel() {
             style={{ background: `linear-gradient(to right, #242424 0%, #242424 ${(wIdx / (font.weights.length - 1)) * 100}%, #C9C8C3 ${(wIdx / (font.weights.length - 1)) * 100}%, #C9C8C3 100%)` }}
           />
         </div>
+
+        {/* Download — pushed to the far right on desktop */}
         <a
           href={font.download}
           target="_blank"
           rel="noopener noreferrer"
-          style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#BB3308", color: "#fff", fontFamily: "var(--loaded-dm-mono), monospace", fontSize: 13, letterSpacing: "0.02em", padding: "10px 16px", borderRadius: 4, textDecoration: "none" }}
+          style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#BB3308", color: "#fff", fontFamily: "var(--loaded-dm-mono), monospace", fontSize: 13, letterSpacing: "0.02em", padding: "10px 16px", borderRadius: 4, textDecoration: "none", flexShrink: 0, marginLeft: isMobile ? 0 : "auto" }}
         >
           Download {font.name} <ArrowIcon />
         </a>
