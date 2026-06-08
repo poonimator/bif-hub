@@ -25,6 +25,11 @@ export default function Home() {
 
   return (
     <>
+      {/* Small dragon mark — top left */}
+      <a href="/" aria-label="Bhutan Innovation Festival Hub" className="fixed z-[300]" style={{ top: 28, left: 32, lineHeight: 0 }}>
+        <img src="/bif-logo.svg" alt="" aria-hidden="true" style={{ width: 34, height: 34 }} />
+      </a>
+
       <p
         className="t-label fixed pointer-events-none"
         style={{ color: 'rgba(255,255,255,0.4)', top: 192, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', zIndex: 10 }}
@@ -56,10 +61,12 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      <div className="fixed z-[300]" style={{ bottom: 32, left: 32 }}>
+      {/* Ask Rigpai — bottom centre */}
+      <div className="fixed z-[300]" style={{ bottom: 32, left: '50%', transform: 'translateX(-50%)' }}>
         <ChatBar mode={chatMode} setMode={setChatMode} section={activeSection} />
       </div>
-      <div className="fixed z-[300]" style={{ bottom: 32, right: 32 }}>
+      {/* Agent toggle — top right, plain symbol + text */}
+      <div className="fixed z-[300]" style={{ top: 28, right: 32 }}>
         <AgentToggle isAgent={isAgent} onToggle={toggleAgent} />
       </div>
     </>

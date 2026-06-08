@@ -172,8 +172,8 @@ export default function HomeGrid({ isAgent = false, onSectionChange }: HomeGridP
 
       {/* ── Index view ── */}
       <div
-        className="min-h-screen flex flex-col items-center justify-start px-10 transition-opacity duration-400"
-        style={{ opacity: (activeSection && !isClosing) ? 0 : 1, paddingTop: '256px' }}
+        className="min-h-screen flex flex-col items-center justify-center px-10 transition-opacity duration-400"
+        style={{ opacity: (activeSection && !isClosing) ? 0 : 1 }}
       >
         <div className="flex flex-wrap gap-5 w-full max-w-[1200px] justify-center">
           {CARDS.map((card) => (

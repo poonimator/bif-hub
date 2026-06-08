@@ -1,35 +1,34 @@
 'use client'
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useIsMobile } from "../../hooks/useIsMobile";
 
 /**
- * BPTypefaceCarousel — three-slide type specimen that types out a pangram in
- * each of the brand's typefaces. Replaces the old cursor-spotlight (which
- * re-rendered the giant text on every mousemove and felt shaky).
+ * BPTypefaceCarousel — type specimen.
  *
- * Slide 1 — Brasil        (display)
- * Slide 2 — Space Grotesk (text)
- * Slide 3 — DM Mono       (mono)
+ * Row 1 — Brasil (display, dark)
+ * Row 2 — Space Grotesk (Ember) + DM Mono (Azure)
+ *
+ * Four themed lines, all about human abundance. The Brasil row types in; the
+ * arrows cycle through the four themes.
  */
 
-type Typeface = "sans" | "public" | "mono";
+const EMBER = "#BB3308";
+const AZURE = "#0B6FB8"; // Azure (#51C8FF) is too light on the paper bg — darkened for legibility
+const INK = "#242424";
 
-// Each typeface gets a true pangram — a meaningful sentence that exercises
-// every letter, which is exactly what a specimen is for.
-const SPECIMENS: Record<Typeface, { name: string; text: string; family: string }> = {
-  sans:   { name: "Brasil",        text: "The quick brown fox jumps over the lazy dog", family: "'Brasil', Georgia, serif" },
-  public: { name: "Space Grotesk", text: "Pack my box with five dozen liquor jugs",     family: "var(--loaded-space-grotesk), system-ui, sans-serif" },
-  mono:   { name: "DM Mono",       text: "How vexingly quick daft zebras jump",          family: "var(--loaded-dm-mono), ui-monospace, monospace" },
-};
-
-const ORDER: Typeface[] = ["sans", "public", "mono"];
+const SLIDES = [
+  { theme: "Human Abundance",      line: "Human abundance lets every life flourish." },
+  { theme: "Mindful Societies",    line: "Mindful societies prize quiet, present wisdom." },
+  { theme: "Intelligent Economies",line: "Intelligent economies weave craft with progress." },
+  { theme: "Regenerative Systems", line: "Regenerative systems renew forest, river and soil." },
+];
 
 interface Props {
   fontWeight: number;
   monoFontWeight: number;
   publicFontWeight: number;
-  onTypefaceChange: (t: Typeface) => void;
-  activeTypeface: Typeface;
+  onTypefaceChange: (t: "sans" | "public" | "mono") => void;
+  activeTypeface: "sans" | "public" | "mono";
 }
 
 const ChevronLeft = () => (
@@ -43,110 +42,67 @@ const ChevronRight = () => (
   </svg>
 );
 
-export default function BPTypefaceCarousel({ fontWeight, monoFontWeight, publicFontWeight, onTypefaceChange, activeTypeface }: Props) {
+export default function BPTypefaceCarousel({ fontWeight }: Props) {
   const isMobile = useIsMobile();
-  const [hoverLeft, setHoverLeft]   = useState(false);
-  const [hoverRight, setHoverRight] = useState(false);
+  const [i, setI] = useState(0);
   const [typed, setTyped] = useState("");
+  const [hoverL, setHoverL] = useState(false);
+  const [hoverR, setHoverR] = useState(false);
 
-  const idx = ORDER.indexOf(activeTypeface);
-  const isFirst = idx <= 0;
-  const isLast  = idx >= ORDER.length - 1;
-  const spec = SPECIMENS[activeTypeface];
-  const weight = activeTypeface === "sans" ? fontWeight : activeTypeface === "public" ? publicFontWeight : monoFontWeight;
+  const slide = SLIDES[i];
+  const isFirst = i <= 0;
+  const isLast = i >= SLIDES.length - 1;
 
-  const goLeft  = () => { if (!isFirst) onTypefaceChange(ORDER[idx - 1]); };
-  const goRight = () => { if (!isLast)  onTypefaceChange(ORDER[idx + 1]); };
-
-  // Typewriter: retype whenever the active typeface changes.
-  const fullRef = useRef(spec.text);
-  fullRef.current = spec.text;
   useEffect(() => {
-    const full = SPECIMENS[activeTypeface].text;
+    const full = SLIDES[i].line;
     setTyped("");
-    let i = 0;
+    let n = 0;
     const id = window.setInterval(() => {
-      i += 1;
-      setTyped(full.slice(0, i));
-      if (i >= full.length) window.clearInterval(id);
-    }, 45);
+      n += 1;
+      setTyped(full.slice(0, n));
+      if (n >= full.length) window.clearInterval(id);
+    }, 38);
     return () => window.clearInterval(id);
-  }, [activeTypeface]);
+  }, [i]);
 
-  const ArrowNav = () => (
-    <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "12px" }}>
-      <span style={{ fontFamily: "var(--loaded-dm-mono), monospace", fontSize: "13px", color: "#8C8C8C", letterSpacing: "0.08em", marginRight: "4px", textTransform: "uppercase" }}>
-        {spec.name}
-      </span>
-      <span style={{ fontFamily: "var(--loaded-dm-mono), monospace", fontSize: "13px", color: "#8C8C8C", letterSpacing: "0.05em", marginRight: "8px" }}>
-        {String(idx + 1).padStart(2, "0")} / 03
-      </span>
-      <button
-        onClick={goLeft} disabled={isFirst} aria-label="Previous typeface"
-        onMouseEnter={() => setHoverLeft(true)} onMouseLeave={() => setHoverLeft(false)}
-        style={{
-          width: "48px", height: "48px", display: "flex", alignItems: "center", justifyContent: "center",
-          borderRadius: "50%", border: `1px solid ${isFirst ? "#D1D0CC" : "#242424"}`,
-          backgroundColor: hoverLeft && !isFirst ? "#242424" : "transparent",
-          color: isFirst ? "#D1D0CC" : hoverLeft ? "#FFFFFF" : "#242424",
-          cursor: isFirst ? "not-allowed" : "pointer", transition: "all 0.2s ease", flexShrink: 0,
-        }}
-      >
-        <ChevronLeft />
-      </button>
-      <button
-        onClick={goRight} disabled={isLast} aria-label="Next typeface"
-        onMouseEnter={() => setHoverRight(true)} onMouseLeave={() => setHoverRight(false)}
-        style={{
-          width: "48px", height: "48px", display: "flex", alignItems: "center", justifyContent: "center",
-          borderRadius: "50%", border: `1px solid ${isLast ? "#D1D0CC" : "#242424"}`,
-          backgroundColor: hoverRight && !isLast ? "#242424" : "transparent",
-          color: isLast ? "#D1D0CC" : hoverRight ? "#FFFFFF" : "#242424",
-          cursor: isLast ? "not-allowed" : "pointer", transition: "all 0.2s ease", flexShrink: 0,
-        }}
-      >
-        <ChevronRight />
-      </button>
-    </div>
-  );
+  const rowSize = isMobile ? "clamp(26px, 7vw, 38px)" : "clamp(36px, 4.6vw, 76px)";
+  const arrowBtn = (dir: "l" | "r") => {
+    const disabled = dir === "l" ? isFirst : isLast;
+    const hover = dir === "l" ? hoverL : hoverR;
+    return {
+      width: 48, height: 48, display: "flex", alignItems: "center", justifyContent: "center",
+      borderRadius: "50%", border: `1px solid ${disabled ? "#D1D0CC" : "#242424"}`,
+      backgroundColor: hover && !disabled ? "#242424" : "transparent",
+      color: disabled ? "#D1D0CC" : hover ? "#FFFFFF" : "#242424",
+      cursor: disabled ? "not-allowed" : "pointer", transition: "all 0.2s ease", flexShrink: 0,
+    } as React.CSSProperties;
+  };
 
   return (
-    <section style={{ backgroundColor: "#F4F3EF", width: "100%", paddingBottom: isMobile ? "48px" : "112px", boxSizing: "border-box" }}>
-      <style>{`@keyframes bpCaretBlink { 0%,49%{opacity:1} 50%,100%{opacity:0} }`}</style>
+    <section style={{ backgroundColor: "#F4F3EF", width: "100%", padding: isMobile ? "32px 24px 56px" : "48px 64px 112px", boxSizing: "border-box" }}>
+      <style>{`@keyframes bpCaret { 0%,49%{opacity:1} 50%,100%{opacity:0} }`}</style>
 
-      <div style={{ padding: isMobile ? "32px 24px" : "40px 64px", display: "flex", justifyContent: "flex-end" }}>
-        <ArrowNav />
+      {/* Nav row — aligned left */}
+      <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 12, marginBottom: isMobile ? 28 : 48 }}>
+        <span style={{ fontFamily: "var(--loaded-dm-mono), monospace", fontSize: 13, color: "#8C8C8C", letterSpacing: "0.08em", textTransform: "uppercase", marginRight: 4 }}>{slide.theme}</span>
+        <span style={{ fontFamily: "var(--loaded-dm-mono), monospace", fontSize: 13, color: "#8C8C8C", letterSpacing: "0.05em", marginRight: 8 }}>{String(i + 1).padStart(2, "0")} / 0{SLIDES.length}</span>
+        <button onClick={() => !isFirst && setI(i - 1)} disabled={isFirst} aria-label="Previous" onMouseEnter={() => setHoverL(true)} onMouseLeave={() => setHoverL(false)} style={arrowBtn("l")}><ChevronLeft /></button>
+        <button onClick={() => !isLast && setI(i + 1)} disabled={isLast} aria-label="Next" onMouseEnter={() => setHoverR(true)} onMouseLeave={() => setHoverR(false)} style={arrowBtn("r")}><ChevronRight /></button>
       </div>
 
-      <div style={{ padding: isMobile ? "0 24px" : "0 64px", minHeight: isMobile ? "40vh" : "46vh", display: "flex", alignItems: "center" }}>
-        <p
-          aria-label={spec.text}
-          style={{
-            fontFamily: spec.family,
-            fontWeight: weight,
-            fontSize: isMobile ? "clamp(30px, 9vw, 44px)" : "clamp(48px, 6.4vw, 104px)",
-            lineHeight: 1.06,
-            letterSpacing: "-0.02em",
-            margin: 0,
-            color: "#242424",
-            width: "100%",
-          }}
-        >
-          {typed}
-          <span
-            aria-hidden="true"
-            style={{
-              display: "inline-block",
-              width: "0.06em",
-              height: "0.92em",
-              marginLeft: "0.06em",
-              transform: "translateY(0.1em)",
-              backgroundColor: "#BB3308",
-              animation: "bpCaretBlink 1s step-end infinite",
-            }}
-          />
-        </p>
-      </div>
+      {/* Row 1 — Brasil */}
+      <p style={{ fontFamily: "'Brasil', Georgia, serif", fontWeight, fontSize: rowSize, lineHeight: 1.05, letterSpacing: "-0.02em", margin: 0, color: INK }}>
+        {typed}
+        <span aria-hidden="true" style={{ display: "inline-block", width: "0.05em", height: "0.85em", marginLeft: "0.06em", transform: "translateY(0.08em)", backgroundColor: EMBER, animation: "bpCaret 1s step-end infinite" }} />
+      </p>
+
+      {/* Row 2 — Space Grotesk (Ember) + DM Mono (Azure) */}
+      <p style={{ fontFamily: "var(--loaded-space-grotesk), system-ui, sans-serif", fontWeight: 500, fontSize: rowSize, lineHeight: 1.1, letterSpacing: "-0.01em", margin: `${isMobile ? 20 : 28}px 0 0`, color: EMBER }}>
+        {slide.line}
+      </p>
+      <p style={{ fontFamily: "var(--loaded-dm-mono), ui-monospace, monospace", fontWeight: 400, fontSize: isMobile ? "clamp(20px, 5vw, 28px)" : "clamp(26px, 3vw, 46px)", lineHeight: 1.2, margin: `${isMobile ? 12 : 16}px 0 0`, color: AZURE }}>
+        {slide.line}
+      </p>
     </section>
   );
 }

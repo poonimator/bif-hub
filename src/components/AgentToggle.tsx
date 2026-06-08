@@ -17,13 +17,12 @@ export default function AgentToggle({ isAgent, onToggle }: AgentToggleProps) {
       whileHover={{ scale: 1.06 }}
       whileTap={{ scale: 0.95 }}
       transition={spring}
-      className="flex items-center cursor-pointer border-0 rounded-full font-mono text-[12px] tracking-[0.08em] whitespace-nowrap"
+      className="t-ui flex items-center cursor-pointer border-0 bg-transparent whitespace-nowrap"
       style={{
-        background: isAgent ? '#242017' : '#1A1813',
-        color: isAgent ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.5)',
-        padding: '14px 20px',
+        color: isAgent ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.6)',
+        padding: 0,
         height: 44,
-        gap: 10,
+        gap: 8,
       }}
       aria-label={isAgent ? 'Switch to human view' : 'Switch to agent view'}
     >

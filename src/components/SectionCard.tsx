@@ -153,7 +153,7 @@ export default function SectionCard({
             WebkitBackdropFilter: 'blur(3px)',
           }}
         >
-          <span className="t-ui" style={{ color: '#FFFFFF' }}>Enter site&nbsp;↗</span>
+          <span className="t-ui" style={{ color: '#FFFFFF' }}>Explore BIF-27 Hub&nbsp;↗</span>
         </div>
       )}
     </button>
