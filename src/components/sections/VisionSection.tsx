@@ -15,16 +15,13 @@ const DARK = '#0e0e0a';
 const PAPER = '#F4EFE6';
 const EMBER = '#BB3308';
 const INK = '#232323';
-// Brand "Sage" green accent. Brand sage is neon-bright, so it reads on dark;
-// on the cream/paper blocks we deepen it (same green identity) for legibility.
-const SAGE = '#17FF3E';      // brand sage — accent on dark
-const SAGE_DEEP = '#0C7A2C'; // deepened sage — accent on paper
+// Ember reads on both the dark and cream blocks, so one accent serves all.
 
 const IMG = (n: number) => `/humanabundance/ha-${String(n).padStart(2, '0')}.jpg`;
 const norm = (w: string) => w.toLowerCase().replace(/[^a-z]/g, '');
 
 /** Justified, uppercase Brasil headline with word-by-word rise; key words accent in ember. */
-function JustifiedReveal({ text, color, accent = SAGE_DEEP, highlight = [] }: { text: string; color: string; accent?: string; highlight?: string[] }) {
+function JustifiedReveal({ text, color, accent = EMBER, highlight = [] }: { text: string; color: string; accent?: string; highlight?: string[] }) {
   const ref = useRef<HTMLHeadingElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.2 });
   const set = new Set(highlight.map(norm));
@@ -102,6 +99,7 @@ const TILES_B: Tile[] = (() => {
   const out: Tile[] = [];
   const at = [27, 33, 39]; let p = 0;
   for (let n = 22; n <= 42; n++) {
+    if (n === 29) continue; // removed
     out.push({ type: 'img', n });
     if (at.includes(n) && p < PILLARS.length) { out.push({ type: 'text', idx: p }); p++; }
   }
@@ -127,10 +125,10 @@ export default function VisionSection() {
         <BPHumanAbundanceHero />
 
         {/* 1 */}
-        <Block bg={PAPER} color={INK} accent={SAGE_DEEP} lines={[{ text: 'Humanity has spent centuries solving scarcity. Today, we face a different challenge.', highlight: ['scarcity', 'challenge'] }]} />
+        <Block bg={PAPER} color={INK} accent={EMBER} lines={[{ text: 'Humanity has spent centuries solving scarcity. Today, we face a different challenge.', highlight: ['scarcity', 'challenge'] }]} />
 
         {/* 2 — merged: question + limitation */}
-        <Block bg={DARK} color={PAPER} accent={SAGE} lines={[
+        <Block bg={DARK} color={PAPER} accent={EMBER} lines={[
           { text: 'What happens when intelligence becomes abundant?', highlight: ['intelligence', 'abundant'] },
           { text: 'But intelligence alone does not create meaning. Capability alone does not create purpose.', highlight: ['meaning', 'purpose'] },
         ]} />
@@ -144,12 +142,12 @@ export default function VisionSection() {
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.6 }} transition={{ duration: 0.8, ease }}
             style={{ maxWidth: 760, margin: '0 auto', textAlign: 'center', fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(20px, 2.4vw, 32px)', lineHeight: 1.4, letterSpacing: '-0.01em' }}
           >
-            As we advance, humanity searches for what remains scarce — <span style={{ color: SAGE }}>presence, belonging, trust, purpose, connection</span>. The things that remain human.
+            As we advance, humanity searches for what remains scarce — <span style={{ color: EMBER }}>presence, belonging, trust, purpose, connection</span>. The things that remain human.
           </motion.p>
         </section>
 
         {/* 4 — merged: thesis + conclusion */}
-        <Block bg={PAPER} color={INK} accent={SAGE_DEEP} lines={[
+        <Block bg={PAPER} color={INK} accent={EMBER} lines={[
           { text: 'Progress should be measured not by the intelligence of our systems, but by the flourishing of our people.', highlight: ['flourishing', 'people'] },
           { text: 'Not by what we produce, but by what we become. This is Human Abundance.', highlight: ['become', 'human', 'abundance'] },
         ]} />
