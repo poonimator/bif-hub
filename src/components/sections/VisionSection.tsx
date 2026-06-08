@@ -15,12 +15,15 @@ const DARK = '#0e0e0a';
 const PAPER = '#F4EFE6';
 const EMBER = '#BB3308';
 const INK = '#232323';
+// Brand "Forest" green accent — Forest base reads on light, the Flourish tint reads on dark.
+const FOREST = '#44693D';   // accent on paper
+const FLOURISH = '#B9DCD2'; // accent on dark
 
 const IMG = (n: number) => `/humanabundance/ha-${String(n).padStart(2, '0')}.jpg`;
 const norm = (w: string) => w.toLowerCase().replace(/[^a-z]/g, '');
 
 /** Justified, uppercase Brasil headline with word-by-word rise; key words accent in ember. */
-function JustifiedReveal({ text, color, highlight = [] }: { text: string; color: string; highlight?: string[] }) {
+function JustifiedReveal({ text, color, accent = FOREST, highlight = [] }: { text: string; color: string; accent?: string; highlight?: string[] }) {
   const ref = useRef<HTMLHeadingElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.2 });
   const set = new Set(highlight.map(norm));
@@ -31,7 +34,7 @@ function JustifiedReveal({ text, color, highlight = [] }: { text: string; color:
         <React.Fragment key={i}>
           <span style={{ display: 'inline-block', overflow: 'hidden', verticalAlign: 'bottom', paddingBottom: '0.15em', marginBottom: '-0.15em' }}>
             <motion.span
-              style={{ display: 'inline-block', color: set.has(norm(w)) ? EMBER : color }}
+              style={{ display: 'inline-block', color: set.has(norm(w)) ? accent : color }}
               initial={{ y: '115%' }} animate={inView ? { y: '0%' } : { y: '115%' }}
               transition={{ duration: 0.9, delay: 0.05 + i * 0.05, ease }}
             >
@@ -46,11 +49,11 @@ function JustifiedReveal({ text, color, highlight = [] }: { text: string; color:
 }
 
 /** A statement section — one or two justified lines on a full-bleed background. */
-function Block({ bg, color, lines }: { bg: string; color: string; lines: { text: string; highlight?: string[] }[] }) {
+function Block({ bg, color, accent, lines }: { bg: string; color: string; accent: string; lines: { text: string; highlight?: string[] }[] }) {
   return (
     <section style={{ background: bg, padding: 'clamp(80px, 11vw, 168px) clamp(24px, 4vw, 56px)' }}>
       <div style={{ maxWidth: 1512, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 'clamp(24px, 3vw, 48px)' }}>
-        {lines.map((l, i) => <JustifiedReveal key={i} text={l.text} color={color} highlight={l.highlight} />)}
+        {lines.map((l, i) => <JustifiedReveal key={i} text={l.text} color={color} accent={accent} highlight={l.highlight} />)}
       </div>
     </section>
   );
@@ -123,10 +126,10 @@ export default function VisionSection() {
         <BPHumanAbundanceHero />
 
         {/* 1 */}
-        <Block bg={PAPER} color={INK} lines={[{ text: 'Humanity has spent centuries solving scarcity. Today, we face a different challenge.', highlight: ['scarcity', 'challenge'] }]} />
+        <Block bg={PAPER} color={INK} accent={FOREST} lines={[{ text: 'Humanity has spent centuries solving scarcity. Today, we face a different challenge.', highlight: ['scarcity', 'challenge'] }]} />
 
         {/* 2 — merged: question + limitation */}
-        <Block bg={DARK} color={PAPER} lines={[
+        <Block bg={DARK} color={PAPER} accent={FLOURISH} lines={[
           { text: 'What happens when intelligence becomes abundant?', highlight: ['intelligence', 'abundant'] },
           { text: 'But intelligence alone does not create meaning. Capability alone does not create purpose.', highlight: ['meaning', 'purpose'] },
         ]} />
@@ -140,12 +143,12 @@ export default function VisionSection() {
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.6 }} transition={{ duration: 0.8, ease }}
             style={{ maxWidth: 760, margin: '0 auto', textAlign: 'center', fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(20px, 2.4vw, 32px)', lineHeight: 1.4, letterSpacing: '-0.01em' }}
           >
-            As we advance, humanity searches for what remains scarce — <span style={{ color: EMBER }}>presence, belonging, trust, purpose, connection</span>. The things that remain human.
+            As we advance, humanity searches for what remains scarce — <span style={{ color: FLOURISH }}>presence, belonging, trust, purpose, connection</span>. The things that remain human.
           </motion.p>
         </section>
 
         {/* 4 — merged: thesis + conclusion */}
-        <Block bg={PAPER} color={INK} lines={[
+        <Block bg={PAPER} color={INK} accent={FOREST} lines={[
           { text: 'Progress should be measured not by the intelligence of our systems, but by the flourishing of our people.', highlight: ['flourishing', 'people'] },
           { text: 'Not by what we produce, but by what we become. This is Human Abundance.', highlight: ['become', 'human', 'abundance'] },
         ]} />
