@@ -9,7 +9,6 @@ import BPHumanAbundanceHero from '../brand-playbook/BPHumanAbundanceHero';
 
 const ease = [0.16, 1, 0.3, 1] as const;
 const SERIF = "'Brasil', Georgia, serif";
-const MONO = "'Space Mono', 'Courier New', monospace";
 const BODY = "'Public Sans', system-ui, sans-serif";
 
 const DARK = '#0e0e0a';
@@ -57,32 +56,47 @@ function Block({ bg, color, lines }: { bg: string; color: string; lines: { text:
   );
 }
 
-/** A full-width band of images (the half distributed through the manifesto). */
-function ImageBand({ from, to }: { from: number; to: number }) {
-  const ns = Array.from({ length: to - from + 1 }, (_, i) => from + i);
-  return (
-    <motion.div
-      initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.8, ease }}
-      style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(200px, 1fr))`, gap: 10, padding: '0 10px', background: DARK }}
-    >
-      {ns.map((n) => (
-        <img key={n} src={IMG(n)} alt="" aria-hidden="true" loading="lazy" style={{ width: '100%', height: 'clamp(150px, 20vw, 280px)', objectFit: 'cover', display: 'block', borderRadius: 6 }} />
-      ))}
-    </motion.div>
-  );
-}
-
 const PILLARS = [
   { name: 'Mindful Societies', bg: INK, color: PAPER, body: 'As information becomes infinite, attention becomes precious. Mindful Societies explores how individuals, communities and institutions cultivate presence, meaning and belonging in an age of constant stimulation — keeping human wellbeing in step with technological change.' },
   { name: 'Intelligent Economies', bg: EMBER, color: PAPER, body: 'As capability expands through AI, automation and digital infrastructure, the question is no longer what technology can do, but who it empowers. Intelligent Economies explores how innovation, ownership and opportunity create broader participation, agency and prosperity.' },
   { name: 'Regenerative Systems', bg: PAPER, color: INK, body: 'The future cannot be built on extraction alone. Regenerative Systems explores how economies, cities and infrastructures can generate growth while renewing the ecological and social systems they depend upon.' },
 ];
 
-// Bottom masonry: the other half of the images (22–42) with pillar tiles blended in.
 type Tile = { type: 'img'; n: number } | { type: 'text'; idx: number };
-const TILES: Tile[] = (() => {
+
+/** A flowing 4-column masonry — original aspect ratios, no cropping. */
+function Masonry({ tiles }: { tiles: Tile[] }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true, amount: 0.1 }} transition={{ duration: 0.9, ease }}
+      style={{ background: DARK, padding: 'clamp(40px, 6vw, 88px) clamp(12px, 2vw, 24px)' }}
+    >
+      <div className="va-masonry">
+        {tiles.map((t, i) =>
+          t.type === 'img' ? (
+            <img key={`i${i}`} src={IMG(t.n)} alt="" aria-hidden="true" loading="lazy" />
+          ) : (
+            <div key={`t${i}`} className="va-tile" style={{ background: PILLARS[t.idx].bg, color: PILLARS[t.idx].color }}>
+              <h3>{PILLARS[t.idx].name}</h3>
+              <p style={{ opacity: 0.82 }}>{PILLARS[t.idx].body}</p>
+            </div>
+          )
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+const imgs = (from: number, to: number): Tile[] =>
+  Array.from({ length: to - from + 1 }, (_, i) => ({ type: 'img', n: from + i }));
+
+// Block A (middle) — first half, images only.
+const TILES_A: Tile[] = imgs(1, 21);
+
+// Block B (end) — second half with the three pillar tiles woven through.
+const TILES_B: Tile[] = (() => {
   const out: Tile[] = [];
-  const at = [26, 33, 40]; let p = 0;
+  const at = [27, 33, 39]; let p = 0;
   for (let n = 22; n <= 42; n++) {
     out.push({ type: 'img', n });
     if (at.includes(n) && p < PILLARS.length) { out.push({ type: 'text', idx: p }); p++; }
@@ -110,32 +124,25 @@ export default function VisionSection() {
 
         {/* 1 */}
         <Block bg={PAPER} color={INK} lines={[{ text: 'Humanity has spent centuries solving scarcity. Today, we face a different challenge.', highlight: ['scarcity', 'challenge'] }]} />
-        <ImageBand from={1} to={6} />
 
         {/* 2 — merged: question + limitation */}
         <Block bg={DARK} color={PAPER} lines={[
           { text: 'What happens when intelligence becomes abundant?', highlight: ['intelligence', 'abundant'] },
           { text: 'But intelligence alone does not create meaning. Capability alone does not create purpose.', highlight: ['meaning', 'purpose'] },
         ]} />
-        <ImageBand from={7} to={12} />
 
-        {/* 3 — the scarce, human things: centered paragraph with image above */}
-        <section style={{ background: PAPER, color: INK, padding: 'clamp(64px, 9vw, 140px) clamp(24px, 5vw, 80px) clamp(80px, 11vw, 168px)' }}>
-          <div style={{ maxWidth: 760, margin: '0 auto', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'clamp(28px, 4vw, 48px)' }}>
-            <motion.img
-              src={IMG(13)} alt="" aria-hidden="true" loading="lazy"
-              initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ duration: 0.9, ease }}
-              style={{ width: '100%', maxWidth: 560, height: 'auto', borderRadius: 8, display: 'block' }}
-            />
-            <motion.p
-              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.6 }} transition={{ duration: 0.8, ease }}
-              style={{ margin: 0, fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(20px, 2.4vw, 32px)', lineHeight: 1.4, letterSpacing: '-0.01em' }}
-            >
-              As we advance, humanity searches for what remains scarce — <span style={{ color: EMBER }}>presence, belonging, trust, purpose, connection</span>. The things that remain human.
-            </motion.p>
-          </div>
+        {/* Masonry A — middle of the page */}
+        <Masonry tiles={TILES_A} />
+
+        {/* 3 — the scarce, human things: centered paragraph */}
+        <section style={{ background: PAPER, color: INK, padding: 'clamp(80px, 12vw, 180px) clamp(24px, 5vw, 80px)' }}>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.6 }} transition={{ duration: 0.8, ease }}
+            style={{ maxWidth: 760, margin: '0 auto', textAlign: 'center', fontFamily: SERIF, fontWeight: 500, fontSize: 'clamp(20px, 2.4vw, 32px)', lineHeight: 1.4, letterSpacing: '-0.01em' }}
+          >
+            As we advance, humanity searches for what remains scarce — <span style={{ color: EMBER }}>presence, belonging, trust, purpose, connection</span>. The things that remain human.
+          </motion.p>
         </section>
-        <ImageBand from={14} to={21} />
 
         {/* 4 — merged: thesis + conclusion */}
         <Block bg={DARK} color={PAPER} lines={[
@@ -143,20 +150,9 @@ export default function VisionSection() {
           { text: 'Not by what we produce, but by what we become. This is Human Abundance.', highlight: ['become', 'human', 'abundance'] },
         ]} />
 
-        {/* Bottom masonry — the other half + blended pillar tiles */}
-        <div style={{ background: DARK, padding: 'clamp(48px, 6vw, 96px) clamp(12px, 2vw, 24px) clamp(112px, 16vw, 200px)' }}>
-          <div className="va-masonry">
-            {TILES.map((t, i) =>
-              t.type === 'img' ? (
-                <img key={`i${i}`} src={IMG(t.n)} alt="" aria-hidden="true" loading="lazy" />
-              ) : (
-                <div key={`t${i}`} className="va-tile" style={{ background: PILLARS[t.idx].bg, color: PILLARS[t.idx].color }}>
-                  <h3>{PILLARS[t.idx].name}</h3>
-                  <p style={{ opacity: 0.82 }}>{PILLARS[t.idx].body}</p>
-                </div>
-              )
-            )}
-          </div>
+        {/* Masonry B — end of the page, with pillar tiles woven in */}
+        <div style={{ paddingBottom: 'clamp(64px, 10vw, 140px)' }}>
+          <Masonry tiles={TILES_B} />
         </div>
       </div>
     </PageReveal>

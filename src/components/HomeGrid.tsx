@@ -34,7 +34,7 @@ const CARDS: CardConfig[] = [
   { id: 'website', label: '', bg: '#1a1813', textColor: '#ffffff', backgroundImage: '/website.webp', backgroundVideo: '/website-card.mp4', icon: '/websitelogo.svg', iconSize: 48, href: WEBSITE_URL },
   { id: 'vision',  label: '', bg: '#1a1813', textColor: '#ffffff', backgroundImage: '/vision.webp', backgroundVideo: '/vision-card.mp4', labelLeft: 'Human', labelRight: 'Abundance' },
   { id: 'brand',   label: 'Brand', bg: '#1a1813', textColor: '#ffffff', backgroundImage: '/brand.webp',   backgroundVideo: '/brand-card.mp4',   centerLabel: true },
-  { id: 'tools',   label: 'LOOM', bg: '#1a1813', textColor: '#ffffff', backgroundImage: '/tools.webp',   backgroundVideo: '/tools-card.mp4',   centerLabel: true },
+  { id: 'tools',   label: 'LOOM', bg: '#1a1813', textColor: '#ffffff', backgroundImage: '/loom.jpg',   centerLabel: true },
 ];
 
 const SECTION_CONTENT: Record<SectionId, React.ReactNode> = {
