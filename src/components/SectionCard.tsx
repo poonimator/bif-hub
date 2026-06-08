@@ -21,6 +21,8 @@ interface SectionCardProps {
   labelLeft?: string;
   labelRight?: string;
   comingSoon?: boolean;
+  /** object-position for the background image (default 'center top'). */
+  imagePosition?: string;
   /** If set, the card navigates to this URL instead of zooming into a section. */
   href?: string;
 }
@@ -41,6 +43,7 @@ export default function SectionCard({
   labelLeft,
   labelRight,
   comingSoon = false,
+  imagePosition = 'center top',
   href,
 }: SectionCardProps) {
   const internalRef = useRef<HTMLButtonElement>(null);
@@ -70,8 +73,8 @@ export default function SectionCard({
           src={backgroundImage}
           alt=""
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover object-top pointer-events-none"
-          style={{ zIndex: 0 }}
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          style={{ zIndex: 0, objectPosition: imagePosition }}
         />
       )}
 
