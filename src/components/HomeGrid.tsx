@@ -48,7 +48,7 @@ const SECTION_CONTENT: Record<SectionId, React.ReactNode> = {
 // it. Match each section's own top background to avoid a colour flash.
 const SECTION_BG: Record<SectionId, string> = {
   website: '#16150F', // links out; never actually zooms
-  vision:  '#FFFFFF', // placeholder content is light
+  vision:  '#0e0e0a', // Human Abundance manifesto opens on the dark hero
   brand:   '#FFFFFF', // brand playbook is light
   tools:   '#16150F', // tools content is dark (nightfall)
 };
