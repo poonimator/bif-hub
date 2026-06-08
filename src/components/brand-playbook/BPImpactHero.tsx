@@ -28,7 +28,7 @@ export default function BPImpactHero() {
   const textStyle: React.CSSProperties = {
     fontFamily: "'Brasil', Georgia, serif",
     fontWeight: 500,
-    fontSize: "120px",
+    fontSize: "96px",
     lineHeight: "90%",
     letterSpacing: "-0.03em",
     color: "#FFFFFF",

@@ -7,11 +7,11 @@ import { WEBSITE_URL } from "@/lib/links";
 
 export type FooterSection = "website" | "vision" | "brand" | "tools";
 
-const SECTIONS: Record<FooterSection, { label: string; href: string; poster: string; video: string }> = {
+const SECTIONS: Record<FooterSection, { label: string; href: string; poster: string; video?: string; objectPosition?: string }> = {
   website: { label: "Website", href: "/website", poster: "/website.webp", video: "/website-card.mp4" },
   vision: { label: "Vision", href: "/vision", poster: "/vision.webp", video: "/vision-card.mp4" },
   brand: { label: "Brand", href: "/brand", poster: "/brand.webp", video: "/brand-card.mp4" },
-  tools: { label: "LOOM", href: "/tools", poster: "/tools.webp", video: "/tools-card.mp4" },
+  tools: { label: "LOOM", href: "/tools", poster: "/loom.jpg", objectPosition: "center 30%" },
 }
 
 const ORDER: FooterSection[] = ["website", "vision", "brand", "tools"]
@@ -88,8 +88,8 @@ export default function Footer({ current }: { current: FooterSection }) {
                 }}
                 className="bif-footer-card"
               >
-                <img src={SECTIONS[s].poster} alt="" aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", zIndex: 0 }} />
-                <LoopingVideo src={SECTIONS[s].video} style={{ zIndex: 1 }} />
+                <img src={SECTIONS[s].poster} alt="" aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: SECTIONS[s].objectPosition ?? "top", zIndex: 0 }} />
+                {SECTIONS[s].video && <LoopingVideo src={SECTIONS[s].video!} style={{ zIndex: 1 }} />}
                 <div aria-hidden="true" style={{ position: "absolute", inset: 0, zIndex: 2, background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 60%)" }} />
                 <span style={{ position: "absolute", bottom: 10, left: 12, zIndex: 3, fontFamily: "'Brasil', Georgia, serif", fontWeight: 500, fontSize: 15, color: "#FFFFFF", textTransform: "uppercase", letterSpacing: "0.02em" }}>
                   {SECTIONS[s].label}
@@ -117,8 +117,8 @@ export default function Footer({ current }: { current: FooterSection }) {
             transition: "top 0.65s cubic-bezier(0.16,1,0.3,1), left 0.65s cubic-bezier(0.16,1,0.3,1), width 0.65s cubic-bezier(0.16,1,0.3,1), height 0.65s cubic-bezier(0.16,1,0.3,1), border-radius 0.65s cubic-bezier(0.16,1,0.3,1)",
           }}
         >
-          <img src={SECTIONS[flying.section].poster} alt="" aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", zIndex: 0 }} />
-          <LoopingVideo src={SECTIONS[flying.section].video} style={{ zIndex: 1 }} />
+          <img src={SECTIONS[flying.section].poster} alt="" aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: SECTIONS[flying.section].objectPosition ?? "top", zIndex: 0 }} />
+          {SECTIONS[flying.section].video && <LoopingVideo src={SECTIONS[flying.section].video!} style={{ zIndex: 1 }} />}
           <div aria-hidden="true" style={{ position: "absolute", inset: 0, zIndex: 2, background: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 50%)" }} />
         </div>
       )}
