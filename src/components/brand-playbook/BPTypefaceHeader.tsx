@@ -42,17 +42,6 @@ export default function BPTypefaceHeader() {
         >
           Brasil
         </span>
-        <span
-          style={{
-            fontFamily: "'Public Sans', system-ui, sans-serif",
-            fontWeight: 600,
-            fontSize: "14px",
-            lineHeight: "normal",
-            color: "#ffffff",
-          }}
-        >
-          Display
-        </span>
       </section>
     );
   }
@@ -102,24 +91,6 @@ export default function BPTypefaceHeader() {
         }}
       >
         Brasil
-      </span>
-
-      {/* ── Right label: Secondary typeface ── */}
-      <span
-        style={{
-          fontFamily: "'Public Sans', system-ui, sans-serif",
-          fontWeight: 600,
-          /* Exact from Figma: 24px SemiBold white */
-          fontSize: "24px",
-          lineHeight: "normal",
-          color: "#ffffff",
-          /* Fixed width from Figma: 683px */
-          width: "683px",
-          flexShrink: 0,
-          whiteSpace: "nowrap",
-        }}
-      >
-        Display
       </span>
     </section>
   );

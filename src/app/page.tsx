@@ -33,7 +33,7 @@ export default function Home() {
         <span
           aria-hidden="true"
           style={{
-            display: 'block', width: 26, height: 26, background: '#ffffff',
+            display: 'block', width: 20, height: 20, background: '#ffffff',
             WebkitMask: 'url(/bif-logo.svg) center / contain no-repeat',
             mask: 'url(/bif-logo.svg) center / contain no-repeat',
           }}
