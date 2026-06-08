@@ -1,29 +1,37 @@
 import type { SectionId } from '@/components/SectionCard';
 
-export interface KBFolder {
+export const KB_BASE = 'https://bif27-kb-mcp.ethan-choo.workers.dev';
+
+export interface KBDoc {
   folder: string;
-  files: string[];
+  slug: string;
+  title: string;
+  description: string;
 }
 
-export const KB: KBFolder[] = [
-  { folder: 'bif24', files: ['overview.md', 'speakers.md'] },
-  { folder: 'bif27', files: ['overview.md', 'speakers.md'] },
-  { folder: 'brand', files: ['colours.md', 'messaging.md', 'strategy.md', 'typography-spacing.md'] },
-  { folder: 'craft', files: ['bif27-track.md', 'creative-economy.md', 'global-recognition.md', 'textiles.md'] },
-  { folder: 'gmc', files: ['companies.md', 'leadership.md', 'overview.md', 'roadmap.md', 'setup-guide.md'] },
-  { folder: 'skills', files: ['creative-direction.md', 'cross-connections.md', 'day-summary.md', 'delegate-faq.md', 'gmc-explainer.md', 'session-copy.md', 'speaker-briefing.md', 'system-prompt.md', 'textile-track-pitch.md'] },
-];
+/**
+ * Call a KB MCP tool. Tool results arrive as a JSON string inside
+ * content[0].text. Open CORS — safe to call directly from the browser.
+ */
+export async function kbTool<T = unknown>(name: string, args: Record<string, unknown> = {}): Promise<T> {
+  const res = await fetch(`${KB_BASE}/mcp`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name, arguments: args } }),
+  });
+  const data = await res.json();
+  return JSON.parse(data.result.content[0].text) as T;
+}
 
 // Which KB folder backs each section's "agent mode" view.
-// website has no folder yet; vision is not yet mapped.
 export const SECTION_FOLDER: Record<SectionId, string | null> = {
   website: null,
-  vision: null,
+  vision: 'vision',
   brand: 'brand',
   tools: 'skills',
 };
 
-export function filesForFolder(folder: string | null): string[] {
-  if (!folder) return [];
-  return KB.find((k) => k.folder === folder)?.files ?? [];
-}
+// The canonical lead document per section folder (opened/sorted first).
+export const SECTION_LEAD: Record<string, string> = {
+  vision: 'human-abundance',
+};

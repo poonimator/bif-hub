@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import KBWindow from './KBWindow';
-import { filesForFolder } from '@/lib/kb';
+import { SECTION_LEAD } from '@/lib/kb';
+import { useKBDocuments } from '@/hooks/useKBDocuments';
 
 interface OpenDoc { folder: string; slug: string }
 
@@ -13,13 +14,22 @@ interface SectionAgentOverlayProps {
 }
 
 export default function SectionAgentOverlay({ folder, title }: SectionAgentOverlayProps) {
+  const { byFolder, loaded } = useKBDocuments();
   const [openDocs, setOpenDocs] = useState<OpenDoc[]>([]);
-  const files = filesForFolder(folder);
   const openKeys = new Set(openDocs.map((d) => `${d.folder}/${d.slug}`));
 
-  function open(file: string) {
+  // Docs for this section's folder, with the canonical lead doc first.
+  const lead = folder ? SECTION_LEAD[folder] : undefined;
+  const docs = (folder ? byFolder[folder] ?? [] : []).slice().sort((a, b) => {
+    if (lead) {
+      if (a.slug === lead) return -1;
+      if (b.slug === lead) return 1;
+    }
+    return 0;
+  });
+
+  function open(slug: string) {
     if (!folder) return;
-    const slug = file.replace('.md', '');
     const key = `${folder}/${slug}`;
     setOpenDocs((prev) => (prev.some((d) => `${d.folder}/${d.slug}` === key) ? prev : [...prev, { folder, slug }]));
   }
@@ -42,26 +52,23 @@ export default function SectionAgentOverlay({ folder, title }: SectionAgentOverl
         background: 'rgba(8, 7, 5, 0.55)',
       }}
     >
-      <p
-        className="font-mono text-[12px] tracking-[0.18em] uppercase"
-        style={{ color: 'rgba(255,255,255,0.45)', marginBottom: 28 }}
-      >
+      <p className="font-mono text-[12px] tracking-[0.18em] uppercase" style={{ color: 'rgba(255,255,255,0.45)', marginBottom: 28 }}>
         {folder ? `${folder}/` : title}
       </p>
 
-      {files.length === 0 ? (
+      {docs.length === 0 ? (
         <p className="font-mono text-[12px]" style={{ color: 'rgba(255,255,255,0.35)' }}>
-          No documents yet for this section.
+          {loaded ? 'No documents yet for this section.' : 'Loading…'}
         </p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}>
-          {files.map((file) => {
-            const slug = file.replace('.md', '');
-            const isOpen = openKeys.has(`${folder}/${slug}`);
+          {docs.map((doc) => {
+            const isOpen = openKeys.has(`${folder}/${doc.slug}`);
             return (
               <button
-                key={file}
-                onClick={() => open(file)}
+                key={doc.slug}
+                onClick={() => open(doc.slug)}
+                title={doc.description || doc.title}
                 className="font-mono text-[13px] border-0 bg-transparent p-0 cursor-pointer"
                 style={{
                   color: isOpen ? '#BB3308' : 'rgba(255,255,255,0.65)',
@@ -71,7 +78,7 @@ export default function SectionAgentOverlay({ folder, title }: SectionAgentOverl
                 onMouseEnter={(e) => { if (!isOpen) e.currentTarget.style.color = '#ffffff'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.color = isOpen ? '#BB3308' : 'rgba(255,255,255,0.65)'; }}
               >
-                {file}
+                {doc.slug}.md
               </button>
             );
           })}
