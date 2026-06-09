@@ -25,6 +25,9 @@ export default function BrandPlaybookClient() {
         fontFamily: "'Public Sans', system-ui, sans-serif",
         backgroundColor: "#FFFFFF",
         minHeight: "100vh",
+        borderBottomLeftRadius: 32,
+        borderBottomRightRadius: 32,
+        overflow: "hidden",
       }}
     >
       <PageReveal current="brand">

@@ -1,17 +1,37 @@
 'use client'
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useCallback, useState } from "react";
+import dynamic from "next/dynamic";
 import LoopingVideo from "./LoopingVideo";
+import ZoomShell from "./ZoomShell";
 import { useIsMobile } from "../hooks/useIsMobile";
 import { WEBSITE_URL } from "@/lib/links";
 
 export type FooterSection = "website" | "vision" | "brand" | "tools";
 
-const SECTIONS: Record<FooterSection, { label: string; href: string; poster: string; video?: string; objectPosition?: string }> = {
-  website: { label: "Website", href: "/website", poster: "/website.webp", video: "/website-card.mp4" },
-  vision: { label: "Vision", href: "/vision", poster: "/vision.webp", video: "/vision-card.mp4" },
-  brand: { label: "Brand", href: "/brand", poster: "/brand.webp", video: "/brand-card.mp4" },
-  tools: { label: "LOOM", href: "/tools", poster: "/loom.jpg", objectPosition: "center 30%" },
+// Loaded on demand (and breaks the PageReveal → Footer → Section import cycle).
+const VisionSection = dynamic(() => import("./sections/VisionSection"));
+const BrandSection = dynamic(() => import("./sections/BrandSection"));
+const ToolsSection = dynamic(() => import("./sections/ToolsSection"));
+
+const SECTION_CONTENT: Partial<Record<FooterSection, React.ReactNode>> = {
+  vision: <VisionSection />,
+  brand: <BrandSection />,
+  tools: <ToolsSection />,
+};
+
+// Top background of each section — match it so the zoom has no colour flash.
+const SECTION_BG: Record<FooterSection, string> = {
+  website: "#16150F",
+  vision: "#0e0e0a",
+  brand: "#FFFFFF",
+  tools: "#16150F",
+};
+
+const SECTIONS: Record<FooterSection, { label: string; poster: string; video?: string; objectPosition?: string }> = {
+  website: { label: "Website", poster: "/website.webp", video: "/website-card.mp4" },
+  vision: { label: "Vision", poster: "/vision.webp", video: "/vision-card.mp4" },
+  brand: { label: "Brand", poster: "/brand.webp", video: "/brand-card.mp4" },
+  tools: { label: "LOOM", poster: "/loom.jpg", objectPosition: "center 30%" },
 }
 
 const ORDER: FooterSection[] = ["website", "vision", "brand", "tools"]
@@ -19,27 +39,80 @@ const BLURB =
   "Bhutan Innovation Festival convenes the world's builders for three days in the Himalayas — defining the societal operating system for an intelligent age, where mindful societies, intelligent economies and regenerative systems create human abundance."
 const MONO = "'Space Mono', 'Courier New', monospace"
 
-interface Flying { section: FooterSection; rect: { top: number; left: number; width: number; height: number } }
+interface FlyingRect { top: number; left: number; width: number; height: number; vw: number; vh: number }
 
 export default function Footer({ current }: { current: FooterSection }) {
   const isMobile = useIsMobile()
-  const router = useRouter()
   const others = ORDER.filter((s) => s !== current)
-  const [flying, setFlying] = useState<Flying | null>(null)
-  const [expanded, setExpanded] = useState(false)
 
-  function openCard(section: FooterSection, el: HTMLElement) {
-    // The Website card opens the standalone marketing site in a new tab, just
-    // like the homepage — no internal route, no flying animation.
+  // Hub-style open: fly the card to fullscreen and reveal the section in a
+  // ZoomShell overlay — identical interaction to the main hub home grid.
+  const [activeSection, setActiveSection] = useState<FooterSection | null>(null)
+  const [flyingRect, setFlyingRect] = useState<FlyingRect | null>(null)
+  const [isZoomed, setIsZoomed] = useState(false)
+  const [isClosing, setIsClosing] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+
+  const openCard = useCallback((section: FooterSection, el: HTMLElement) => {
+    // Website opens the standalone marketing site in a new tab — same as the hub.
     if (section === "website") {
       window.open(WEBSITE_URL, "_blank", "noopener,noreferrer")
       return
     }
     const r = el.getBoundingClientRect()
-    setFlying({ section, rect: { top: r.top, left: r.left, width: r.width, height: r.height } })
-    requestAnimationFrame(() => requestAnimationFrame(() => setExpanded(true)))
-    // navigate once the grow has played
-    setTimeout(() => router.push(SECTIONS[section].href), 700)
+    setFlyingRect({ top: r.top, left: r.left, width: r.width, height: r.height, vw: window.innerWidth, vh: window.innerHeight })
+    setActiveSection(section)
+    requestAnimationFrame(() => requestAnimationFrame(() => setIsZoomed(true)))
+  }, [])
+
+  const closeSection = useCallback(() => {
+    setIsClosing(true)
+    setIsZoomed(false)
+    setIsFullscreen(false)
+    setTimeout(() => {
+      setActiveSection(null)
+      setFlyingRect(null)
+      setIsClosing(false)
+    }, 650)
+  }, [])
+
+  const card = activeSection ? SECTIONS[activeSection] : null
+  const heroScale = flyingRect ? Math.max(flyingRect.width / flyingRect.vw, flyingRect.height / flyingRect.vh) : 1
+  const inv = 1 / heroScale
+  const cardCx = flyingRect ? flyingRect.left + flyingRect.width / 2 : 0
+  const cardCy = flyingRect ? flyingRect.top + flyingRect.height / 2 : 0
+  const labelEdge = isFullscreen ? 0 : 32
+
+  const clip = flyingRect
+    ? isClosing
+      ? "inset(0px round 0px)"
+      : !isZoomed
+        ? `inset(${flyingRect.top}px ${flyingRect.vw - flyingRect.left - flyingRect.width}px ${flyingRect.vh - flyingRect.top - flyingRect.height}px ${flyingRect.left}px round 4px)`
+        : isFullscreen
+          ? "inset(0px round 0px)"
+          : "inset(32px round 22px)"
+    : "none"
+
+  const flyingStyle: React.CSSProperties = flyingRect
+    ? {
+        position: "fixed", zIndex: 101, overflow: "hidden", isolation: "isolate",
+        top: 0, left: 0, width: "100vw", height: "100vh",
+        background: activeSection ? SECTION_BG[activeSection] : "transparent",
+        clipPath: clip, WebkitClipPath: clip,
+        transform: isClosing ? "translateY(100vh)" : "none",
+        transition: isClosing
+          ? "transform 0.5s cubic-bezier(0.4,0,1,1)"
+          : "clip-path 0.6s cubic-bezier(0.16,1,0.3,1), -webkit-clip-path 0.6s cubic-bezier(0.16,1,0.3,1)",
+        pointerEvents: isZoomed ? "all" : "none",
+      }
+    : {}
+
+  const heroWrapStyle: React.CSSProperties = {
+    position: "absolute", inset: 0, zIndex: 0,
+    transform: `scale(${(isZoomed || isClosing) ? 1 : heroScale})`,
+    transformOrigin: `${cardCx}px ${cardCy}px`,
+    transition: "transform 0.6s cubic-bezier(0.16,1,0.3,1)",
+    willChange: "transform",
   }
 
   return (
@@ -51,7 +124,7 @@ export default function Footer({ current }: { current: FooterSection }) {
           margin: "0 auto",
           boxSizing: "border-box",
           padding: isMobile ? "64px 24px 88px" : "96px 64px 112px",
-          opacity: flying ? 0 : 1,
+          opacity: (activeSection && !isClosing) ? 0 : 1,
           transition: "opacity 0.4s ease",
         }}
       >
@@ -89,7 +162,7 @@ export default function Footer({ current }: { current: FooterSection }) {
                 className="bif-footer-card"
               >
                 <img src={SECTIONS[s].poster} alt="" aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: SECTIONS[s].objectPosition ?? "top", zIndex: 0 }} />
-                {SECTIONS[s].video && <LoopingVideo src={SECTIONS[s].video!} style={{ zIndex: 1 }} />}
+                {SECTIONS[s].video && <LoopingVideo src={SECTIONS[s].video!} playing={!activeSection} style={{ zIndex: 1 }} />}
                 <div aria-hidden="true" style={{ position: "absolute", inset: 0, zIndex: 2, background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 60%)" }} />
                 <span style={{ position: "absolute", bottom: 10, left: 12, zIndex: 3, fontFamily: "'Brasil', Georgia, serif", fontWeight: 500, fontSize: 15, color: "#FFFFFF", textTransform: "uppercase", letterSpacing: "0.02em" }}>
                   {SECTIONS[s].label}
@@ -98,28 +171,46 @@ export default function Footer({ current }: { current: FooterSection }) {
             ))}
           </div>
         </div>
-
       </div>
 
-      {/* Flying card — grows from its footer position to fullscreen, then navigates */}
-      {flying && (
+      {/* Dark overlay behind the zoom (hides the page outside the clip window) */}
+      {flyingRect && (
         <div
-          style={{
-            position: "fixed",
-            zIndex: 400,
-            overflow: "hidden",
-            top: expanded ? 0 : flying.rect.top,
-            left: expanded ? 0 : flying.rect.left,
-            width: expanded ? "100vw" : flying.rect.width,
-            height: expanded ? "100vh" : flying.rect.height,
-            borderRadius: expanded ? 0 : 6,
-            background: "#1a1813",
-            transition: "top 0.65s cubic-bezier(0.16,1,0.3,1), left 0.65s cubic-bezier(0.16,1,0.3,1), width 0.65s cubic-bezier(0.16,1,0.3,1), height 0.65s cubic-bezier(0.16,1,0.3,1), border-radius 0.65s cubic-bezier(0.16,1,0.3,1)",
-          }}
-        >
-          <img src={SECTIONS[flying.section].poster} alt="" aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: SECTIONS[flying.section].objectPosition ?? "top", zIndex: 0 }} />
-          {SECTIONS[flying.section].video && <LoopingVideo src={SECTIONS[flying.section].video!} style={{ zIndex: 1 }} />}
-          <div aria-hidden="true" style={{ position: "absolute", inset: 0, zIndex: 2, background: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 50%)" }} />
+          aria-hidden="true"
+          style={{ position: "fixed", inset: 0, zIndex: 100, background: "#16150F", pointerEvents: "none", opacity: isZoomed ? 1 : 0, transition: "opacity 0.5s ease" }}
+        />
+      )}
+
+      {/* Flying screen — card grows to full viewport, then the section reveals */}
+      {flyingRect && activeSection && (
+        <div style={flyingStyle}>
+          <div style={heroWrapStyle}>
+            {card?.poster && (
+              <img src={card.poster} alt="" aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: card.objectPosition ?? "top", zIndex: 0 }} />
+            )}
+            {card?.video && (
+              <LoopingVideo src={card.video} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }} />
+            )}
+            <div aria-hidden="true" style={{ position: "absolute", inset: 0, zIndex: 2, pointerEvents: "none", background: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 50%)" }} />
+            <div className="absolute left-0 right-0 pointer-events-none" style={{ bottom: labelEdge, zIndex: 3, transition: "bottom 0.6s cubic-bezier(0.16,1,0.3,1)" }}>
+              {card?.label && (
+                <span className="absolute bottom-0 left-0 font-display font-medium leading-none" style={{ color: "#FFFFFF", padding: 14 * inv, fontSize: 18 * inv, textTransform: "uppercase" }}>
+                  {card.label}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {isZoomed && (
+            <ZoomShell
+              sectionId={activeSection}
+              onClose={closeSection}
+              onScrolled={setIsFullscreen}
+              sectionBg={SECTION_BG[activeSection]}
+            >
+              {SECTION_CONTENT[activeSection]}
+            </ZoomShell>
+          )}
         </div>
       )}
     </footer>
