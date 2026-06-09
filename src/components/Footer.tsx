@@ -1,6 +1,7 @@
 'use client'
 import React, { useCallback, useState } from "react";
 import dynamic from "next/dynamic";
+import { motion, AnimatePresence } from "framer-motion";
 import LoopingVideo from "./LoopingVideo";
 import ZoomShell from "./ZoomShell";
 import { useIsMobile } from "../hooks/useIsMobile";
@@ -19,7 +20,7 @@ const SECTION_CONTENT: Partial<Record<FooterSection, React.ReactNode>> = {
   tools: <ToolsSection />,
 };
 
-// Top background of each section — match it so the zoom has no colour flash.
+// Top background of each section — match it so the slide has no colour flash.
 const SECTION_BG: Record<FooterSection, string> = {
   website: "#16150F",
   vision: "#0e0e0a",
@@ -38,78 +39,47 @@ const ORDER: FooterSection[] = ["website", "vision", "brand", "tools"]
 const BLURB =
   "Bhutan Innovation Festival convenes the world's builders for three days in the Himalayas — defining the societal operating system for an intelligent age, where mindful societies, intelligent economies and regenerative systems create human abundance."
 const MONO = "'Space Mono', 'Courier New', monospace"
-
-interface FlyingRect { top: number; left: number; width: number; height: number; vw: number; vh: number }
+const EASE = [0.16, 1, 0.3, 1] as const
 
 export default function Footer({ current }: { current: FooterSection }) {
   const isMobile = useIsMobile()
   const others = ORDER.filter((s) => s !== current)
 
-  // Hub-style open: fly the card to fullscreen and reveal the section in a
-  // ZoomShell overlay — identical interaction to the main hub home grid.
+  // Open a section as a full-screen layer that SLIDES UP from below; closing
+  // SLIDES it back DOWN, uncovering the page beneath. (framer-motion drives
+  // this on the main thread, so it stays reliable everywhere the footer lives —
+  // routes and in-place ZoomShell overlays alike.)
   const [activeSection, setActiveSection] = useState<FooterSection | null>(null)
-  const [flyingRect, setFlyingRect] = useState<FlyingRect | null>(null)
-  const [isZoomed, setIsZoomed] = useState(false)
-  const [isClosing, setIsClosing] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
 
-  const openCard = useCallback((section: FooterSection, el: HTMLElement) => {
+  const openCard = useCallback((section: FooterSection) => {
     // Website opens the standalone marketing site in a new tab — same as the hub.
     if (section === "website") {
       window.open(WEBSITE_URL, "_blank", "noopener,noreferrer")
       return
     }
-    const r = el.getBoundingClientRect()
-    setFlyingRect({ top: r.top, left: r.left, width: r.width, height: r.height, vw: window.innerWidth, vh: window.innerHeight })
+    setIsFullscreen(false)
     setActiveSection(section)
-    requestAnimationFrame(() => requestAnimationFrame(() => setIsZoomed(true)))
   }, [])
 
   const closeSection = useCallback(() => {
-    setIsClosing(true)
-    setIsZoomed(false)
+    setActiveSection(null)
     setIsFullscreen(false)
-    setTimeout(() => {
-      setActiveSection(null)
-      setFlyingRect(null)
-      setIsClosing(false)
-    }, 650)
   }, [])
 
   const card = activeSection ? SECTIONS[activeSection] : null
   const labelEdge = isFullscreen ? 0 : 32
 
-  // Open → the new section slides up from below; close → it slides back down
-  // (the current page leaving). A clean vertical pass, in place of the old
-  // card→fullscreen clip-path zoom that read awkwardly from a small card.
-  const slideY = isZoomed && !isClosing ? "0" : "100vh";
-
-  const flyingStyle: React.CSSProperties = flyingRect
-    ? {
-        position: "fixed", zIndex: 101, overflow: "hidden", isolation: "isolate",
-        top: 0, left: 0, width: "100vw", height: "100vh",
-        background: activeSection ? SECTION_BG[activeSection] : "transparent",
-        transform: `translateY(${slideY})`,
-        transition: "transform 0.62s cubic-bezier(0.16,1,0.3,1)",
-        willChange: "transform",
-        pointerEvents: isZoomed ? "all" : "none",
-      }
-    : {}
-
-  const heroWrapStyle: React.CSSProperties = {
-    position: "absolute", inset: 0, zIndex: 0,
-  }
-
   return (
     <footer style={{ backgroundColor: "#16150F", color: "#FFFFFF", width: "100%", position: "sticky", bottom: 0, zIndex: 0 }}>
-      {/* Footer content — fades out when a card is expanding */}
+      {/* Footer content — fades out while a section is open */}
       <div
         style={{
           maxWidth: 1512,
           margin: "0 auto",
           boxSizing: "border-box",
           padding: isMobile ? "64px 24px 88px" : "96px 64px 112px",
-          opacity: (activeSection && !isClosing) ? 0 : 1,
+          opacity: activeSection ? 0 : 1,
           transition: "opacity 0.4s ease",
         }}
       >
@@ -133,8 +103,8 @@ export default function Footer({ current }: { current: FooterSection }) {
                 role="button"
                 tabIndex={0}
                 aria-label={`Open ${SECTIONS[s].label}`}
-                onClick={(e) => openCard(s, e.currentTarget)}
-                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openCard(s, e.currentTarget) } }}
+                onClick={() => openCard(s)}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openCard(s) } }}
                 style={{
                   position: "relative",
                   width: isMobile ? "calc((100vw - 48px - 24px) / 3)" : 200,
@@ -158,35 +128,41 @@ export default function Footer({ current }: { current: FooterSection }) {
         </div>
       </div>
 
-      {/* Dark overlay behind the zoom (hides the page outside the clip window) */}
-      {flyingRect && (
-        <div
-          aria-hidden="true"
-          style={{ position: "fixed", inset: 0, zIndex: 100, background: "#16150F", pointerEvents: "none", opacity: isZoomed ? 1 : 0, transition: "opacity 0.5s ease" }}
-        />
-      )}
-
-      {/* Flying screen — card grows to full viewport, then the section reveals */}
-      {flyingRect && activeSection && (
-        <div style={flyingStyle}>
-          <div style={heroWrapStyle}>
-            {card?.poster && (
-              <img src={card.poster} alt="" aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: card.objectPosition ?? "top", zIndex: 0 }} />
-            )}
-            {card?.video && (
-              <LoopingVideo src={card.video} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }} />
-            )}
-            <div aria-hidden="true" style={{ position: "absolute", inset: 0, zIndex: 2, pointerEvents: "none", background: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 50%)" }} />
-            <div className="absolute left-0 right-0 pointer-events-none" style={{ bottom: labelEdge, zIndex: 3, transition: "bottom 0.6s cubic-bezier(0.16,1,0.3,1)" }}>
-              {card?.label && (
+      {/* Section layer — slides up on open, down on close */}
+      <AnimatePresence>
+        {activeSection && card && (
+          <motion.div
+            key={activeSection}
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ duration: 0.6, ease: EASE }}
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 101,
+              overflow: "hidden",
+              isolation: "isolate",
+              background: SECTION_BG[activeSection],
+              willChange: "transform",
+            }}
+          >
+            {/* Hero — section poster/video fills the top of the layer */}
+            <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
+              {card.poster && (
+                <img src={card.poster} alt="" aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: card.objectPosition ?? "top", zIndex: 0 }} />
+              )}
+              {card.video && (
+                <LoopingVideo src={card.video} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }} />
+              )}
+              <div aria-hidden="true" style={{ position: "absolute", inset: 0, zIndex: 2, pointerEvents: "none", background: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 50%)" }} />
+              <div className="absolute left-0 right-0 pointer-events-none" style={{ bottom: labelEdge, zIndex: 3, transition: "bottom 0.6s cubic-bezier(0.16,1,0.3,1)" }}>
                 <span className="absolute bottom-0 left-0 font-display font-medium leading-none" style={{ color: "#FFFFFF", padding: 14, fontSize: 18, textTransform: "uppercase" }}>
                   {card.label}
                 </span>
-              )}
+              </div>
             </div>
-          </div>
 
-          {isZoomed && (
             <ZoomShell
               sectionId={activeSection}
               onClose={closeSection}
@@ -195,9 +171,9 @@ export default function Footer({ current }: { current: FooterSection }) {
             >
               {SECTION_CONTENT[activeSection]}
             </ZoomShell>
-          )}
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </footer>
   )
 }
