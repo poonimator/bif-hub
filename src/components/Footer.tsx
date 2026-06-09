@@ -36,6 +36,17 @@ const SECTIONS: Record<FooterSection, { label: string; poster: string; video?: s
   tools: { label: "LOOM", poster: "/loom.jpg", objectPosition: "center 30%" },
 }
 
+// Nearest full-screen fixed layer above the footer = the "existing page"
+// (works whether it was opened by the footer or the home grid).
+function nearestFixedLayer(el: HTMLElement | null): HTMLElement | null {
+  let n = el?.parentElement ?? null
+  while (n && n !== document.body) {
+    if (getComputedStyle(n).position === "fixed") return n
+    n = n.parentElement
+  }
+  return null
+}
+
 const ORDER: FooterSection[] = ["website", "vision", "brand", "tools"]
 const BLURB =
   "Bhutan Innovation Festival convenes the world's builders for three days in the Himalayas — defining the societal operating system for an intelligent age, where mindful societies, intelligent economies and regenerative systems create human abundance."
@@ -60,10 +71,10 @@ export default function Footer({ current }: { current: FooterSection }) {
       window.open(WEBSITE_URL, "_blank", "noopener,noreferrer")
       return
     }
-    // The current page to slide off: the surrounding scroll layer if we're
-    // already inside a section, otherwise the whole app shell.
-    const zoom = footerRef.current?.closest("#zoomedContent") as HTMLElement | null
-    slideElRef.current = zoom ?? (typeof document !== "undefined" ? document.getElementById("app-shell") : null)
+    // The "existing page" to close = the section layer this footer lives in
+    // (a full-viewport overlay). On the base page there's none — the new
+    // section simply rises over it. We never translate the tall page itself.
+    slideElRef.current = nearestFixedLayer(footerRef.current)
     setIsFullscreen(false)
     setActiveSection(section)
   }, [])
@@ -73,23 +84,21 @@ export default function Footer({ current }: { current: FooterSection }) {
     setIsFullscreen(false)
   }, [])
 
-  // Slide the current page OFF (down) while a section is open; restore on close.
-  // The incoming section (portaled to <body>) slides in over the gap.
+  // Close the existing section layer (slide it DOWN and out) while the new one
+  // rises over it; restore it on close. It's a full-viewport overlay, so
+  // translateY(100%) === one screen down — a clean exit.
   useEffect(() => {
     const el = slideElRef.current
     if (!activeSection || !el) return
-    const prevBg = document.body.style.background
-    document.body.style.background = "#16150F" // dark reveal behind the leaving page
     el.style.transition = "transform 0.5s cubic-bezier(0.16,1,0.3,1)"
     el.style.willChange = "transform"
-    void el.offsetHeight // force reflow so the transition picks up the change (no rAF dependency)
+    void el.offsetHeight // force reflow so the transition picks up the change
     el.style.transform = "translateY(100%)"
     return () => {
       el.style.transform = ""
       window.setTimeout(() => {
         el.style.transition = ""
         el.style.willChange = ""
-        document.body.style.background = prevBg
       }, 540)
     }
   }, [activeSection])
@@ -105,6 +114,7 @@ export default function Footer({ current }: { current: FooterSection }) {
       {activeSection && card && (
         <motion.div
           key={activeSection}
+          data-section-overlay=""
           initial={{ y: "100%" }}
           animate={{ y: 0, transition: { duration: 0.55, ease: EASE, delay: 0.3 } }}
           exit={{ y: "100%", transition: { duration: 0.45, ease: EASE } }}
