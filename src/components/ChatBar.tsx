@@ -218,7 +218,7 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
           border-radius: inherit;
           z-index: -1;
           background: conic-gradient(from var(--rg-angle),
-            #51C8FF, #17FF3E, #FFC24B, #BB3308, #FF6A3D, #9B6DFF, #51C8FF);
+            #51C8FF, #17FF3E, #BB3308, #51C8FF);
           animation: rigpaiSpin 4.5s linear infinite;
         }
         /* soft blurred copy for a slim halo of colour */
@@ -228,7 +228,7 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
           .rigpai-ring::before, .rigpai-ring::after { animation: none; }
         }
       `}</style>
-      <div className="rigpai-ring" style={{ borderRadius: ringRadius }}>
+      <div className={isIdle ? 'rigpai-ring' : ''} style={{ borderRadius: ringRadius }}>
       <motion.div
         ref={containerRef}
         layout
