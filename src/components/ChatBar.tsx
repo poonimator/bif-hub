@@ -8,7 +8,6 @@ import BifLogo from './icons/BifLogo'
 const spring = { type: 'spring' as const, stiffness: 320, damping: 24, mass: 0.6 }
 export type ChatMode = 'idle' | 'collapsed' | 'input' | 'panel' | 'chat'
 
-const PANEL_HEIGHT = 540
 const PANEL_WIDTH = 560
 const CHAT_MAX_HEIGHT = 540
 

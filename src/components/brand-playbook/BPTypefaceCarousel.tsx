@@ -54,7 +54,7 @@ export default function BPTypefaceCarousel() {
   });
 
   return (
-    <section style={{ backgroundColor: "#F4F3EF", width: "100%", padding: isMobile ? "32px 24px 56px" : "48px 64px 112px", boxSizing: "border-box" }}>
+    <section style={{ backgroundColor: "#F4F3EF", width: "100%", padding: isMobile ? "72px 24px 96px" : "120px 64px 144px", boxSizing: "border-box" }}>
       <style>{`
         input[type=range].bp-tt { -webkit-appearance:none; appearance:none; width:240px; max-width:60vw; height:4px; border-radius:2px; outline:none; cursor:pointer; }
         input[type=range].bp-tt::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:#242424; cursor:pointer; }
@@ -62,7 +62,7 @@ export default function BPTypefaceCarousel() {
       `}</style>
 
       {/* Controls — toggle · weight slider · download, all on one line (desktop) */}
-      <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "flex-start" : "center", gap: isMobile ? 24 : 32, margin: "0 0 40px" }}>
+      <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: "center", justifyContent: "center", gap: isMobile ? 24 : 32, margin: "0 0 64px" }}>
         {/* Font toggle */}
         <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 12, flexShrink: 0 }}>
           <span style={{ fontFamily: "var(--loaded-dm-mono), monospace", fontSize: 13, color: "#8C8C8C", letterSpacing: "0.08em", textTransform: "uppercase", marginRight: 4 }}>{font.name}</span>
@@ -92,7 +92,7 @@ export default function BPTypefaceCarousel() {
           href={font.download}
           target="_blank"
           rel="noopener noreferrer"
-          style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#BB3308", color: "#fff", fontFamily: "var(--loaded-dm-mono), monospace", fontSize: 13, letterSpacing: "0.02em", padding: "10px 16px", borderRadius: 4, textDecoration: "none", flexShrink: 0, marginLeft: isMobile ? 0 : "auto" }}
+          style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#BB3308", color: "#fff", fontFamily: "var(--loaded-dm-mono), monospace", fontSize: 13, letterSpacing: "0.02em", padding: "10px 16px", borderRadius: 4, textDecoration: "none", flexShrink: 0 }}
         >
           Download {font.name} <ArrowIcon />
         </a>
@@ -106,9 +106,10 @@ export default function BPTypefaceCarousel() {
           fontSize: isMobile ? "clamp(22px, 5.4vw, 30px)" : "clamp(30px, 3.4vw, 52px)",
           lineHeight: 1.2,
           letterSpacing: "-0.01em",
-          margin: 0,
+          margin: "0 auto",
           color: font.color,
-          maxWidth: 1100,
+          maxWidth: 900,
+          textAlign: "center",
         }}
       >
         {PARAGRAPH}

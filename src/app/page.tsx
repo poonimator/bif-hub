@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
 import HomeGrid from '@/components/HomeGrid';
 import type { SectionId } from '@/components/SectionCard';
@@ -29,7 +30,7 @@ export default function Home() {
   return (
     <>
       {/* Small white dragon mark — top left */}
-      <a href="/" aria-label="Bhutan Innovation Festival Hub" className="fixed z-[300]" style={{ top: 30, left: 32, lineHeight: 0, ...chromeHidden }}>
+      <Link href="/" aria-label="Bhutan Innovation Festival Hub" className="fixed z-[300]" style={{ top: 30, left: 32, lineHeight: 0, ...chromeHidden }}>
         <span
           aria-hidden="true"
           style={{
@@ -38,7 +39,7 @@ export default function Home() {
             mask: 'url(/bif-logo.svg) center / contain no-repeat',
           }}
         />
-      </a>
+      </Link>
 
       {/* Low-opacity divider under the header row */}
       <div

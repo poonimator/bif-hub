@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef } from "react";
 import { useIsMobile } from "../../hooks/useIsMobile";
 import { useScrollWhenVisible } from "../../hooks/useScrollWhenVisible";
 

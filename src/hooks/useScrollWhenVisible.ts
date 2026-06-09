@@ -27,7 +27,7 @@ export function useScrollWhenVisible(
     };
 
     const observer = new IntersectionObserver(
-      ([entry]) => { entry.isIntersecting ? attach() : detach(); },
+      ([entry]) => { if (entry.isIntersecting) attach(); else detach(); },
       { threshold: 0 },
     );
 
