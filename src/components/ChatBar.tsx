@@ -199,44 +199,36 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
     setValue('')
   }
 
-  // Ember aura — pulsing "alive" glow on the idle pill, soft static glow once open.
-  const glowClass = (isPanel || isChat) ? 'rigpai-glow rigpai-glow--soft' : 'rigpai-glow rigpai-glow--alive'
+  // Slim multi-colour gradient ring that circles the pill (Gemini-style).
+  const ringRadius = (isPanel || isChat) ? 24 : 9999
 
   return (
     <div className="relative flex items-end justify-center">
       <style>{`
-        @keyframes rigpaiPulse {
-          0%, 100% {
-            box-shadow:
-              0 0 0 1px rgba(187, 51, 8, 0.30),
-              0 0 22px 1px rgba(187, 51, 8, 0.42),
-              0 6px 48px 4px rgba(187, 51, 8, 0.22);
-          }
-          50% {
-            box-shadow:
-              0 0 0 1px rgba(187, 51, 8, 0.55),
-              0 0 38px 6px rgba(187, 51, 8, 0.62),
-              0 8px 78px 14px rgba(187, 51, 8, 0.40);
-          }
+        @property --rg-angle {
+          syntax: '<angle>';
+          initial-value: 0deg;
+          inherits: false;
         }
-        .rigpai-glow { will-change: box-shadow; }
-        .rigpai-glow--alive { animation: rigpaiPulse 3.2s ease-in-out infinite; }
-        .rigpai-glow--soft {
-          box-shadow:
-            0 0 0 1px rgba(187, 51, 8, 0.20),
-            0 0 26px 2px rgba(187, 51, 8, 0.30),
-            0 10px 64px 6px rgba(187, 51, 8, 0.18);
+        .rigpai-ring { position: relative; border-radius: inherit; transition: border-radius 0.2s ease; }
+        .rigpai-ring::before, .rigpai-ring::after {
+          content: '';
+          position: absolute;
+          inset: -1.5px;
+          border-radius: inherit;
+          z-index: -1;
+          background: conic-gradient(from var(--rg-angle),
+            #51C8FF, #17FF3E, #FFC24B, #BB3308, #FF6A3D, #9B6DFF, #51C8FF);
+          animation: rigpaiSpin 4.5s linear infinite;
         }
+        /* soft blurred copy for a slim halo of colour */
+        .rigpai-ring::after { inset: -5px; filter: blur(11px); opacity: 0.45; }
+        @keyframes rigpaiSpin { to { --rg-angle: 360deg; } }
         @media (prefers-reduced-motion: reduce) {
-          .rigpai-glow--alive {
-            animation: none;
-            box-shadow:
-              0 0 0 1px rgba(187, 51, 8, 0.40),
-              0 0 28px 3px rgba(187, 51, 8, 0.48),
-              0 6px 56px 6px rgba(187, 51, 8, 0.26);
-          }
+          .rigpai-ring::before, .rigpai-ring::after { animation: none; }
         }
       `}</style>
+      <div className="rigpai-ring" style={{ borderRadius: ringRadius }}>
       <motion.div
         ref={containerRef}
         layout
@@ -260,7 +252,7 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
         role={isIdle ? 'button' : undefined}
         tabIndex={isIdle ? 0 : undefined}
         style={{ width: entering ? 44 : ((isPanel || isChat) ? PANEL_WIDTH : 'auto'), maxHeight: isChat ? CHAT_MAX_HEIGHT : undefined, padding: (isPanel || isChat) ? '18px 26px' : '14px 20px', height: (isPanel || isChat) ? undefined : 44 }}
-        className={`relative flex flex-col overflow-hidden bg-[#1A1813] text-white transition-colors duration-150 ${glowClass} ${(isPanel || isChat) ? 'rounded-3xl' : 'rounded-full'} ${isIdle ? 'cursor-pointer hover:bg-[#242017]' : 'cursor-text'} ${(isPanel || isChat) ? '' : 'whitespace-nowrap'}`}
+        className={`relative flex flex-col overflow-hidden bg-[#1A1813] text-white transition-colors duration-150 ${(isPanel || isChat) ? 'rounded-3xl' : 'rounded-full'} ${isIdle ? 'cursor-pointer hover:bg-[#242017]' : 'cursor-text'} ${(isPanel || isChat) ? '' : 'whitespace-nowrap'}`}
       >
         {/* Panel header — Chat label + close (and back when chatting) */}
         {(isPanel || isChat) && (
@@ -465,6 +457,7 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
           </AnimatePresence>
         </div>
       </motion.div>
+      </div>
     </div>
   )
 }
