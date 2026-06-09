@@ -211,7 +211,7 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
           inherits: false;
         }
         .rigpai-ring { position: relative; border-radius: inherit; transition: border-radius 0.2s ease; }
-        .rigpai-ring::before, .rigpai-ring::after {
+        .rigpai-ring::before {
           content: '';
           position: absolute;
           inset: -1.5px;
@@ -222,11 +222,9 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
           animation: rigpaiSpin 4.5s linear infinite;
           opacity: 0.55;
         }
-        /* soft blurred copy for a slim halo of colour */
-        .rigpai-ring::after { inset: -5px; filter: blur(11px); opacity: 0.25; }
         @keyframes rigpaiSpin { to { --rg-angle: 360deg; } }
         @media (prefers-reduced-motion: reduce) {
-          .rigpai-ring::before, .rigpai-ring::after { animation: none; }
+          .rigpai-ring::before { animation: none; }
         }
       `}</style>
       <div className={isIdle ? 'rigpai-ring' : ''} style={{ borderRadius: ringRadius }}>
