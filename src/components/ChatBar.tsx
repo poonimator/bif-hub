@@ -223,7 +223,7 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
           opacity: 0.3;
           transition: opacity 0.4s ease;
         }
-        .rigpai-ring:hover::before { opacity: 0.95; }
+        .rigpai-ring:hover::before { opacity: 1; }
         @keyframes rigpaiSpin { to { --rg-angle: 360deg; } }
         @media (prefers-reduced-motion: reduce) {
           .rigpai-ring::before { animation: none; }
@@ -247,8 +247,7 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
                     ? { paddingLeft: 20, paddingRight: 20, paddingTop: 14, paddingBottom: 14, height: 44 }
                     : { paddingLeft: 20, paddingRight: 20, paddingTop: 14, paddingBottom: 14, height: 44 }
         }
-        whileHover={isIdle && !entering ? { scale: 1.06 } : undefined}
-        whileTap={isIdle && !entering ? { scale: 0.95 } : undefined}
+        whileTap={isIdle && !entering ? { scale: 0.97 } : undefined}
         transition={instantCloseRef.current ? { duration: 0 } : spring}
         role={isIdle ? 'button' : undefined}
         tabIndex={isIdle ? 0 : undefined}
