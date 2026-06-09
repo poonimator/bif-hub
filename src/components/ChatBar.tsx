@@ -218,11 +218,12 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
           border-radius: inherit;
           z-index: -1;
           background: conic-gradient(from var(--rg-angle),
-            #51C8FF, #17FF3E, #BB3308, #51C8FF);
+            #51C8FF, #E5C64C, #BB3308, #51C8FF);
           animation: rigpaiSpin 4.5s linear infinite;
+          opacity: 0.55;
         }
         /* soft blurred copy for a slim halo of colour */
-        .rigpai-ring::after { inset: -5px; filter: blur(11px); opacity: 0.45; }
+        .rigpai-ring::after { inset: -5px; filter: blur(11px); opacity: 0.25; }
         @keyframes rigpaiSpin { to { --rg-angle: 360deg; } }
         @media (prefers-reduced-motion: reduce) {
           .rigpai-ring::before, .rigpai-ring::after { animation: none; }
