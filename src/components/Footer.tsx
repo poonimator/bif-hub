@@ -77,42 +77,27 @@ export default function Footer({ current }: { current: FooterSection }) {
   }, [])
 
   const card = activeSection ? SECTIONS[activeSection] : null
-  const heroScale = flyingRect ? Math.max(flyingRect.width / flyingRect.vw, flyingRect.height / flyingRect.vh) : 1
-  const inv = 1 / heroScale
-  const cardCx = flyingRect ? flyingRect.left + flyingRect.width / 2 : 0
-  const cardCy = flyingRect ? flyingRect.top + flyingRect.height / 2 : 0
   const labelEdge = isFullscreen ? 0 : 32
 
-  const clip = flyingRect
-    ? isClosing
-      ? "inset(0px round 0px)"
-      : !isZoomed
-        ? `inset(${flyingRect.top}px ${flyingRect.vw - flyingRect.left - flyingRect.width}px ${flyingRect.vh - flyingRect.top - flyingRect.height}px ${flyingRect.left}px round 4px)`
-        : isFullscreen
-          ? "inset(0px round 0px)"
-          : "inset(32px round 22px)"
-    : "none"
+  // Open → the new section slides up from below; close → it slides back down
+  // (the current page leaving). A clean vertical pass, in place of the old
+  // card→fullscreen clip-path zoom that read awkwardly from a small card.
+  const slideY = isZoomed && !isClosing ? "0" : "100vh";
 
   const flyingStyle: React.CSSProperties = flyingRect
     ? {
         position: "fixed", zIndex: 101, overflow: "hidden", isolation: "isolate",
         top: 0, left: 0, width: "100vw", height: "100vh",
         background: activeSection ? SECTION_BG[activeSection] : "transparent",
-        clipPath: clip, WebkitClipPath: clip,
-        transform: isClosing ? "translateY(100vh)" : "none",
-        transition: isClosing
-          ? "transform 0.5s cubic-bezier(0.4,0,1,1)"
-          : "clip-path 0.6s cubic-bezier(0.16,1,0.3,1), -webkit-clip-path 0.6s cubic-bezier(0.16,1,0.3,1)",
+        transform: `translateY(${slideY})`,
+        transition: "transform 0.62s cubic-bezier(0.16,1,0.3,1)",
+        willChange: "transform",
         pointerEvents: isZoomed ? "all" : "none",
       }
     : {}
 
   const heroWrapStyle: React.CSSProperties = {
     position: "absolute", inset: 0, zIndex: 0,
-    transform: `scale(${(isZoomed || isClosing) ? 1 : heroScale})`,
-    transformOrigin: `${cardCx}px ${cardCy}px`,
-    transition: "transform 0.6s cubic-bezier(0.16,1,0.3,1)",
-    willChange: "transform",
   }
 
   return (
@@ -194,7 +179,7 @@ export default function Footer({ current }: { current: FooterSection }) {
             <div aria-hidden="true" style={{ position: "absolute", inset: 0, zIndex: 2, pointerEvents: "none", background: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 50%)" }} />
             <div className="absolute left-0 right-0 pointer-events-none" style={{ bottom: labelEdge, zIndex: 3, transition: "bottom 0.6s cubic-bezier(0.16,1,0.3,1)" }}>
               {card?.label && (
-                <span className="absolute bottom-0 left-0 font-display font-medium leading-none" style={{ color: "#FFFFFF", padding: 14 * inv, fontSize: 18 * inv, textTransform: "uppercase" }}>
+                <span className="absolute bottom-0 left-0 font-display font-medium leading-none" style={{ color: "#FFFFFF", padding: 14, fontSize: 18, textTransform: "uppercase" }}>
                   {card.label}
                 </span>
               )}
