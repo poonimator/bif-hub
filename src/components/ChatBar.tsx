@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, CaretLeft } from '@phosphor-icons/react'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { X, CaretLeft, ArrowUp } from '@phosphor-icons/react'
 import BifLogo from './icons/BifLogo'
 
 const spring = { type: 'spring' as const, stiffness: 320, damping: 24, mass: 0.6 }
@@ -90,6 +90,23 @@ function formatTime(d = new Date()) {
   return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
 }
 
+// Animated three-dot typing indicator — Rigpai's "thinking" state, shown inline
+// in the conversation where the reply will land.
+function TypingDots({ reduced }: { reduced: boolean | null }) {
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, height: 20 }} aria-label="Rigpai is typing">
+      {[0, 1, 2].map((i) => (
+        <motion.span
+          key={i}
+          style={{ width: 6, height: 6, borderRadius: 9999, background: 'currentColor' }}
+          animate={reduced ? { opacity: 0.6 } : { opacity: [0.25, 1, 0.25], y: [0, -2, 0] }}
+          transition={reduced ? undefined : { duration: 1.1, repeat: Infinity, ease: 'easeInOut', delay: i * 0.16 }}
+        />
+      ))}
+    </span>
+  )
+}
+
 export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; setMode: (m: ChatMode) => void; section?: string | null }) {
   const chat = (section && SECTION_CHAT[section]) || DEFAULT_CHAT
   const [value, setValue] = useState('')
@@ -100,6 +117,7 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
   const inputRef = useRef<HTMLInputElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   const instantCloseRef = useRef(false)
+  const reduced = useReducedMotion()
 
   // Entrance sequence: spend ~450ms as a small circle with a fast-spinning star,
   // then expand horizontally into the AMA pill.
@@ -111,11 +129,11 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
   // idle → collapsed → input → panel
   useEffect(() => {
     if (mode === 'collapsed') {
-      const t = setTimeout(() => setMode('input'), 280)
+      const t = setTimeout(() => setMode('input'), 180)
       return () => clearTimeout(t)
     }
     if (mode === 'input') {
-      const t = setTimeout(() => setMode('panel'), 900)
+      const t = setTimeout(() => setMode('panel'), 520)
       return () => clearTimeout(t)
     }
   }, [mode])
@@ -175,11 +193,13 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
   }
 
   async function pickSuggestion(text: string) {
-    setMessages([{ role: 'you', text, time: formatTime() }])
+    const trimmed = text.trim()
+    if (!trimmed || thinking) return
+    setMessages([{ role: 'you', text: trimmed, time: formatTime() }])
     setMode('chat')
     setValue('')
     setThinking(true)
-    const reply = await fetchReply(text, [], section)
+    const reply = await fetchReply(trimmed, [], section)
     setMessages(prev => [...prev, { role: 'rigpai', text: reply, time: formatTime() }])
     setThinking(false)
   }
@@ -346,6 +366,9 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 8 }}
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              role="log"
+              aria-live="polite"
+              aria-relevant="additions"
               className="overflow-y-auto no-scrollbar"
               style={{
                 paddingBottom: 24,
@@ -362,11 +385,9 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
                   <motion.div
                     key={i}
                     layout
-                    initial={isReply ? { opacity: 0, y: 6 } : false}
+                    initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={isReply
-                      ? { opacity: { duration: 0.35, delay: 0.35 }, y: { duration: 0.35, delay: 0.35 } }
-                      : { duration: 0.25 }}
+                    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1], delay: isReply ? 0.04 : 0 }}
                     style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
                   >
                     <p className="text-[11px] font-mono tracking-[0.08em]">
@@ -383,6 +404,23 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
                   </motion.div>
                 )
               })}
+
+              {thinking && (
+                <motion.div
+                  layout
+                  key="typing"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
+                >
+                  <p className="text-[11px] font-mono tracking-[0.08em]">
+                    <span className="text-white/70">Rigpai</span>
+                  </p>
+                  <span className="text-white/60"><TypingDots reduced={reduced} /></span>
+                </motion.div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -391,8 +429,8 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
         <div className="flex items-center flex-shrink-0" style={{ gap: 12 }}>
           <motion.span
             className="flex-shrink-0"
-            animate={{ scale: [1, 1.07, 1] }}
-            transition={{ duration: 3.5, ease: 'easeInOut', repeat: Infinity, repeatType: 'loop' }}
+            animate={reduced ? undefined : { scale: [1, 1.07, 1] }}
+            transition={reduced ? undefined : { duration: 3.5, ease: 'easeInOut', repeat: Infinity, repeatType: 'loop' }}
           >
             <BifLogo size={18} />
           </motion.span>
@@ -411,20 +449,7 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
                 Ask Rigpai
               </motion.span>
             )}
-            {thinking && (
-              <motion.span
-                key="thinking"
-                layout
-                initial={{ width: 0, opacity: 0, marginLeft: -12 }}
-                animate={{ width: 'auto', opacity: 1, marginLeft: 0 }}
-                exit={{ width: 0, opacity: 0, marginLeft: -12 }}
-                transition={spring}
-                className="text-[11px] leading-snug text-white/55 font-mono tracking-[0.1em] overflow-hidden whitespace-nowrap"
-              >
-                Thinking…
-              </motion.span>
-            )}
-            {hasInput && !thinking && (
+            {hasInput && (
               <motion.div
                 key="input"
                 layout
@@ -433,6 +458,7 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
                 exit={{ width: 0, opacity: 0, marginLeft: -12 }}
                 transition={spring}
                 className="overflow-hidden"
+                style={{ display: 'flex', alignItems: 'center', gap: 8 }}
               >
                 <input
                   ref={inputRef}
@@ -440,18 +466,35 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
                   value={value}
                   onChange={(e) => setValue(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' && isChat) {
+                    if (e.key === 'Enter') {
                       e.preventDefault()
-                      sendUserMessage(value)
-                    } else if (e.key === 'Enter' && isPanel) {
-                      e.preventDefault()
-                      pickSuggestion(value)
+                      if (isChat) sendUserMessage(value)
+                      else pickSuggestion(value)
                     }
                   }}
-                  placeholder="Ask Rigpai"
-                  style={{ outline: 'none', outlineOffset: 0, boxShadow: 'none' }}
-                  className="w-full bg-transparent text-[13px] leading-snug text-white font-sans placeholder:text-white/40 caret-white"
+                  aria-label="Ask Rigpai"
+                  placeholder={thinking ? 'Rigpai is thinking…' : 'Ask Rigpai'}
+                  style={{ outline: 'none', outlineOffset: 0, boxShadow: 'none', flex: 1, minWidth: 0 }}
+                  className="bg-transparent text-[13px] leading-snug text-white font-sans placeholder:text-white/40 caret-white"
                 />
+                <AnimatePresence initial={false}>
+                  {value.trim().length > 0 && !thinking && (
+                    <motion.button
+                      key="send"
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); if (isChat) sendUserMessage(value); else pickSuggestion(value) }}
+                      initial={{ opacity: 0, scale: 0.5, width: 0, marginLeft: -8 }}
+                      animate={{ opacity: 1, scale: 1, width: 28, marginLeft: 0 }}
+                      exit={{ opacity: 0, scale: 0.5, width: 0, marginLeft: -8 }}
+                      transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                      aria-label="Send message"
+                      className="flex-shrink-0 rounded-full bg-white text-[#1A1813] flex items-center justify-center hover:bg-white/90 active:scale-90 transition-transform"
+                      style={{ height: 28, outline: 'none' }}
+                    >
+                      <ArrowUp size={15} weight="bold" />
+                    </motion.button>
+                  )}
+                </AnimatePresence>
               </motion.div>
             )}
           </AnimatePresence>
