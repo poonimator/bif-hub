@@ -47,7 +47,9 @@ export default function RootLayout({
   return (
     <html lang="en" data-view-mode="human" className={`${spaceMono.variable} ${publicSans.variable} ${dmMono.variable} ${spaceGrotesk.variable}`}>
       <body>
-        {children}
+        {/* App shell — section overlays portal OUTSIDE this, so this layer can
+            slide away on its own during section transitions. */}
+        <div id="app-shell">{children}</div>
       </body>
     </html>
   );

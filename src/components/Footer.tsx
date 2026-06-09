@@ -1,5 +1,6 @@
 'use client'
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import LoopingVideo from "./LoopingVideo";
@@ -45,12 +46,13 @@ export default function Footer({ current }: { current: FooterSection }) {
   const isMobile = useIsMobile()
   const others = ORDER.filter((s) => s !== current)
 
-  // Open a section as a full-screen layer that SLIDES UP from below; closing
-  // SLIDES it back DOWN, uncovering the page beneath. (framer-motion drives
-  // this on the main thread, so it stays reliable everywhere the footer lives —
-  // routes and in-place ZoomShell overlays alike.)
   const [activeSection, setActiveSection] = useState<FooterSection | null>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const footerRef = useRef<HTMLElement>(null)
+  const slideElRef = useRef<HTMLElement | null>(null)
+
+  useEffect(() => { setMounted(true) }, [])
 
   const openCard = useCallback((section: FooterSection) => {
     // Website opens the standalone marketing site in a new tab — same as the hub.
@@ -58,6 +60,10 @@ export default function Footer({ current }: { current: FooterSection }) {
       window.open(WEBSITE_URL, "_blank", "noopener,noreferrer")
       return
     }
+    // The current page to slide off: the surrounding scroll layer if we're
+    // already inside a section, otherwise the whole app shell.
+    const zoom = footerRef.current?.closest("#zoomedContent") as HTMLElement | null
+    slideElRef.current = zoom ?? (typeof document !== "undefined" ? document.getElementById("app-shell") : null)
     setIsFullscreen(false)
     setActiveSection(section)
   }, [])
@@ -67,12 +73,81 @@ export default function Footer({ current }: { current: FooterSection }) {
     setIsFullscreen(false)
   }, [])
 
+  // Slide the current page OFF (down) while a section is open; restore on close.
+  // The incoming section (portaled to <body>) slides in over the gap.
+  useEffect(() => {
+    const el = slideElRef.current
+    if (!activeSection || !el) return
+    const prevBg = document.body.style.background
+    document.body.style.background = "#16150F" // dark reveal behind the leaving page
+    el.style.transition = "transform 0.5s cubic-bezier(0.16,1,0.3,1)"
+    el.style.willChange = "transform"
+    void el.offsetHeight // force reflow so the transition picks up the change (no rAF dependency)
+    el.style.transform = "translateY(100%)"
+    return () => {
+      el.style.transform = ""
+      window.setTimeout(() => {
+        el.style.transition = ""
+        el.style.willChange = ""
+        document.body.style.background = prevBg
+      }, 540)
+    }
+  }, [activeSection])
+
   const card = activeSection ? SECTIONS[activeSection] : null
   const labelEdge = isFullscreen ? 0 : 32
 
+  // The section layer lives on <body> (outside the app shell) so it stays a
+  // true full-screen fixed layer — no transformed/scrolled ancestor to glitch
+  // its positioning — and slides independently of the page leaving beneath it.
+  const overlay = (
+    <AnimatePresence>
+      {activeSection && card && (
+        <motion.div
+          key={activeSection}
+          initial={{ y: "100%" }}
+          animate={{ y: 0, transition: { duration: 0.55, ease: EASE, delay: 0.3 } }}
+          exit={{ y: "100%", transition: { duration: 0.45, ease: EASE } }}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 2147483000,
+            overflow: "hidden",
+            isolation: "isolate",
+            background: SECTION_BG[activeSection],
+            willChange: "transform",
+          }}
+        >
+          <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
+            {card.poster && (
+              <img src={card.poster} alt="" aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: card.objectPosition ?? "top", zIndex: 0 }} />
+            )}
+            {card.video && (
+              <LoopingVideo src={card.video} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }} />
+            )}
+            <div aria-hidden="true" style={{ position: "absolute", inset: 0, zIndex: 2, pointerEvents: "none", background: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 50%)" }} />
+            <div className="absolute left-0 right-0 pointer-events-none" style={{ bottom: labelEdge, zIndex: 3, transition: "bottom 0.6s cubic-bezier(0.16,1,0.3,1)" }}>
+              <span className="absolute bottom-0 left-0 font-display font-medium leading-none" style={{ color: "#FFFFFF", padding: 14, fontSize: 18, textTransform: "uppercase" }}>
+                {card.label}
+              </span>
+            </div>
+          </div>
+
+          <ZoomShell
+            sectionId={activeSection}
+            onClose={closeSection}
+            onScrolled={setIsFullscreen}
+            sectionBg={SECTION_BG[activeSection]}
+          >
+            {SECTION_CONTENT[activeSection]}
+          </ZoomShell>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+
   return (
-    <footer style={{ backgroundColor: "#16150F", color: "#FFFFFF", width: "100%", position: "sticky", bottom: 0, zIndex: 0 }}>
-      {/* Footer content — fades out while a section is open */}
+    <footer ref={footerRef} style={{ backgroundColor: "#16150F", color: "#FFFFFF", width: "100%", position: "sticky", bottom: 0, zIndex: 0 }}>
       <div
         style={{
           maxWidth: 1512,
@@ -128,52 +203,7 @@ export default function Footer({ current }: { current: FooterSection }) {
         </div>
       </div>
 
-      {/* Section layer — slides up on open, down on close */}
-      <AnimatePresence>
-        {activeSection && card && (
-          <motion.div
-            key={activeSection}
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ duration: 0.6, ease: EASE }}
-            style={{
-              position: "fixed",
-              inset: 0,
-              zIndex: 101,
-              overflow: "hidden",
-              isolation: "isolate",
-              background: SECTION_BG[activeSection],
-              willChange: "transform",
-            }}
-          >
-            {/* Hero — section poster/video fills the top of the layer */}
-            <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
-              {card.poster && (
-                <img src={card.poster} alt="" aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: card.objectPosition ?? "top", zIndex: 0 }} />
-              )}
-              {card.video && (
-                <LoopingVideo src={card.video} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }} />
-              )}
-              <div aria-hidden="true" style={{ position: "absolute", inset: 0, zIndex: 2, pointerEvents: "none", background: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 50%)" }} />
-              <div className="absolute left-0 right-0 pointer-events-none" style={{ bottom: labelEdge, zIndex: 3, transition: "bottom 0.6s cubic-bezier(0.16,1,0.3,1)" }}>
-                <span className="absolute bottom-0 left-0 font-display font-medium leading-none" style={{ color: "#FFFFFF", padding: 14, fontSize: 18, textTransform: "uppercase" }}>
-                  {card.label}
-                </span>
-              </div>
-            </div>
-
-            <ZoomShell
-              sectionId={activeSection}
-              onClose={closeSection}
-              onScrolled={setIsFullscreen}
-              sectionBg={SECTION_BG[activeSection]}
-            >
-              {SECTION_CONTENT[activeSection]}
-            </ZoomShell>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {mounted && createPortal(overlay, document.body)}
     </footer>
   )
 }
