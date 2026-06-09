@@ -220,8 +220,10 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
           background: conic-gradient(from var(--rg-angle),
             #51C8FF, #E5C64C, #BB3308, #51C8FF);
           animation: rigpaiSpin 4.5s linear infinite;
-          opacity: 0.55;
+          opacity: 0.3;
+          transition: opacity 0.4s ease;
         }
+        .rigpai-ring:hover::before { opacity: 0.95; }
         @keyframes rigpaiSpin { to { --rg-angle: 360deg; } }
         @media (prefers-reduced-motion: reduce) {
           .rigpai-ring::before { animation: none; }
