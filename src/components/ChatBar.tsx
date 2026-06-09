@@ -254,19 +254,6 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
         ref={containerRef}
         layout
         onClick={() => { if (isIdle && !entering) setMode('collapsed') }}
-        animate={
-          entering
-            ? { paddingLeft: 14, paddingRight: 14, paddingTop: 14, paddingBottom: 14, height: 44 }
-            : isCollapsed
-              ? { paddingLeft: 14, paddingRight: 14, paddingTop: 14, paddingBottom: 14, height: 44 }
-              : isPanel
-                ? { paddingLeft: 26, paddingRight: 26, paddingTop: 18, paddingBottom: 18, height: 'auto' as unknown as number }
-                : isChat
-                  ? { paddingLeft: 26, paddingRight: 26, paddingTop: 18, paddingBottom: 18, height: 'auto' as unknown as number }
-                  : isInput
-                    ? { paddingLeft: 20, paddingRight: 20, paddingTop: 14, paddingBottom: 14, height: 44 }
-                    : { paddingLeft: 20, paddingRight: 20, paddingTop: 14, paddingBottom: 14, height: 44 }
-        }
         whileTap={isIdle && !entering ? { scale: 0.97 } : undefined}
         transition={instantCloseRef.current ? { duration: 0 } : spring}
         role={isIdle ? 'button' : undefined}
@@ -384,7 +371,6 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
                 return (
                   <motion.div
                     key={i}
-                    layout
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1], delay: isReply ? 0.04 : 0 }}
@@ -407,7 +393,6 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
 
               {thinking && (
                 <motion.div
-                  layout
                   key="typing"
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
