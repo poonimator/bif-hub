@@ -5,7 +5,9 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { X, CaretLeft, ArrowUp } from '@phosphor-icons/react'
 import BifLogo from './icons/BifLogo'
 
-const spring = { type: 'spring' as const, stiffness: 320, damping: 24, mass: 0.6 }
+// Calm, near-critically-damped springs — snappy without overshoot/bounce.
+const spring = { type: 'spring' as const, stiffness: 360, damping: 34, mass: 0.7 }
+const morph = { type: 'spring' as const, stiffness: 280, damping: 34, mass: 0.95 }
 export type ChatMode = 'idle' | 'collapsed' | 'input' | 'panel' | 'chat'
 
 const PANEL_WIDTH = 560
@@ -116,7 +118,6 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
-  const instantCloseRef = useRef(false)
   const reduced = useReducedMotion()
 
   // Entrance sequence: spend ~450ms as a small circle with a fast-spinning star,
@@ -126,36 +127,18 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
     return () => clearTimeout(t)
   }, [])
 
-  // idle → collapsed → input → panel
+  // Focus the input as soon as the panel exists
   useEffect(() => {
-    if (mode === 'collapsed') {
-      const t = setTimeout(() => setMode('input'), 180)
-      return () => clearTimeout(t)
-    }
-    if (mode === 'input') {
-      const t = setTimeout(() => setMode('panel'), 520)
-      return () => clearTimeout(t)
-    }
-  }, [mode])
-
-  // Focus the input as soon as it exists
-  useEffect(() => {
-    if (mode !== 'input' && mode !== 'panel' && mode !== 'chat') return
-    const t = setTimeout(() => inputRef.current?.focus(), 220)
+    if (mode !== 'panel' && mode !== 'chat') return
+    const t = setTimeout(() => inputRef.current?.focus(), 180)
     return () => clearTimeout(t)
   }, [mode])
 
-  // Reset instant-close flag once we're back at idle
-  useEffect(() => {
-    if (mode === 'idle') instantCloseRef.current = false
-  }, [mode])
-
-  // Click-outside returns to idle (no animation)
+  // Click-outside returns to idle (smooth reverse morph)
   useEffect(() => {
     if (mode === 'idle') return
     function handler(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        instantCloseRef.current = true
         setMode('idle')
         setValue('')
         setMessages([])
@@ -166,11 +149,9 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
   }, [mode])
 
   const isIdle = mode === 'idle'
-  const isCollapsed = mode === 'collapsed'
-  const isInput = mode === 'input'
   const isPanel = mode === 'panel'
   const isChat = mode === 'chat'
-  const hasInput = isInput || isPanel || isChat
+  const hasInput = isPanel || isChat
 
   // Auto-scroll the chat body to the bottom when messages change
   useEffect(() => {
@@ -212,7 +193,6 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
   }
 
   function close() {
-    instantCloseRef.current = true
     setMode('idle')
     setMessages([])
     setThinking(false)
@@ -253,9 +233,9 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
       <motion.div
         ref={containerRef}
         layout
-        onClick={() => { if (isIdle && !entering) setMode('collapsed') }}
+        onClick={() => { if (isIdle && !entering) setMode('panel') }}
         whileTap={isIdle && !entering ? { scale: 0.97 } : undefined}
-        transition={instantCloseRef.current ? { duration: 0 } : spring}
+        transition={morph}
         role={isIdle ? 'button' : undefined}
         tabIndex={isIdle ? 0 : undefined}
         style={{ width: entering ? 44 : ((isPanel || isChat) ? PANEL_WIDTH : 'auto'), maxHeight: isChat ? CHAT_MAX_HEIGHT : undefined, padding: (isPanel || isChat) ? '18px 26px' : '14px 20px', height: (isPanel || isChat) ? undefined : 44 }}
@@ -286,7 +266,7 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2, delay: 0.15 }}
+                  transition={{ duration: 0.2, delay: 0.05 }}
                   className="text-[11px] font-mono tracking-[0.12em] uppercase text-white/60"
                 >
                   Chat
@@ -312,10 +292,10 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
           {isPanel && (
             <motion.div
               key="panel-body"
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 12 }}
-              transition={{ duration: 0.25, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
+              exit={{ opacity: 0, y: 6 }}
+              transition={{ opacity: { duration: 0.22, delay: 0.06 }, y: { duration: 0.3, delay: 0.06, ease: [0.22, 1, 0.36, 1] } }}
               style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingBottom: 24 }}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -420,7 +400,7 @@ export default function ChatBar({ mode, setMode, section }: { mode: ChatMode; se
             <BifLogo size={18} />
           </motion.span>
 
-          <AnimatePresence initial={false} mode="wait">
+          <AnimatePresence initial={false} mode="popLayout">
             {isIdle && !entering && (
               <motion.span
                 key="label"
